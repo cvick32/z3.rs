@@ -1,8 +1,11 @@
+# Running BMC Test
+
+`cargo run -- --filename examples/array_copy.vmt --bmc-count 0`
+
+Currently `--bmc-count` doesn't do anything, so this will just run BMC on the input system up to a depth of 10. 
+
 # Things we need (in no particular order)
 
-- parsing vmt into transition system
-- transition system -> Z3 model
-- computing implicant of a formula
 - computing interpolants
 - finding axiom violations from egg
 - ranking egg rewrites
