@@ -15,7 +15,6 @@ struct Options {
     // How many times BMC should be UNSAT until we check with an invariant generator.
     #[arg(short, long, default_value_t = 1)]
     bmc_count: usize,
-
 }
 
 fn main() {
@@ -27,13 +26,22 @@ fn main() {
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
     for depth in 0..10 {
-        for d in 0..1 { // Currently run once, this will eventually run until UNSAT
+        println!("STARTING BMC FOR DEPTH {}", depth);
+        for _d in 0..1 {
+            // Currently run once, this will eventually run until UNSAT
             let smt = abstract_vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
             match solver.check() {
-                z3::SatResult::Unsat => break, // Ruled out all counterexamples of this depth.
-                z3::SatResult::Unknown => todo!(),
+                z3::SatResult::Unsat => {
+                    println!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
+                    break;
+                }
+                z3::SatResult::Unknown => {
+                    // CV: I've seen Z3 return unknown then re-run Z3 and gotten SAT or UNSAT.
+                    // This might be a place to retry at least once before panicking.
+                    panic!("Z3 RETURNED UNKNOWN!");
+                }
                 z3::SatResult::Sat => {
                     // find Array theory fact that rules out counterexample
                     let model = solver.get_model().unwrap();
@@ -41,9 +49,8 @@ fn main() {
                     // Model to Egraph
                     // Find one or many theory violations
                     // Add violations as facts
-                },
+                }
             }
-            
         }
     }
 }
