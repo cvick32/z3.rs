@@ -12,7 +12,8 @@ struct Options {
     #[arg(short, long)]
     filename: String,
 
-    #[arg(short, long)]
+    // How many times BMC should be UNSAT until we check with an invariant generator.
+    #[arg(short, long, default_value_t = 1)]
     bmc_count: usize,
 
 }
@@ -26,7 +27,7 @@ fn main() {
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
     for depth in 0..10 {
-        for d in 0..2 {
+        for d in 0..1 { // Currently run once, this will eventually run until UNSAT
             let smt = abstract_vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
@@ -44,6 +45,5 @@ fn main() {
             }
             
         }
-        
     }
 }
