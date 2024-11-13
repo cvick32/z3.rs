@@ -4,7 +4,7 @@ define_language! {
     pub enum ArrayLanguage {
         Num(i64),
         "K" = ConstArr([Id; 1]),
-        "Write" = Write([Id; 2]),
+        "Write" = Write([Id; 3]),
         "Read" = Read([Id; 2]),
         Symbol(Symbol),
     }
@@ -18,9 +18,35 @@ pub fn make_array_axioms() -> Vec<Rewrite<ArrayLanguage, ()>> {
     ]
 }
 
-fn not_equal(index_0: &'static str, index_1: &'static str) -> impl Fn(&mut EGraph<ArrayLanguage, ()>, Id, &Subst) -> bool {
+fn not_equal(
+    index_0: &'static str,
+    index_1: &'static str,
+) -> impl Fn(&mut EGraph<ArrayLanguage, ()>, Id, &Subst) -> bool {
     let var_0 = index_0.parse().unwrap();
     let var_1 = index_1.parse().unwrap();
 
     move |egraph, _, subst| egraph.find(subst[var_0]) != egraph.find(subst[var_1])
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_conditional_axioms0() {
+        let expr: RecExpr<ArrayLanguage> = "(Read (Write A 0 0) 1)".parse().unwrap();
+        let runner = Runner::default().with_expr(&expr).run(&make_array_axioms());
+
+        let gold: RecExpr<ArrayLanguage> = "(Read A 1)".parse().unwrap();
+        assert!(runner.egraph.lookup_expr(&gold).is_some())
+    }
+
+    #[test]
+    fn test_conditional_axioms1() {
+        let expr: RecExpr<ArrayLanguage> = "(Read (Write A 0 0) 0)".parse().unwrap();
+        let runner = Runner::default().with_expr(&expr).run(&make_array_axioms());
+
+        let gold: RecExpr<ArrayLanguage> = "(Read A 0)".parse().unwrap();
+        assert!(runner.egraph.lookup_expr(&gold).is_none())
+    }
 }
