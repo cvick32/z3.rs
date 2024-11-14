@@ -497,7 +497,6 @@ impl Term {
         V::E: std::fmt::Debug,
     {
         use Term::*;
-        println!("blah: {self:?}");
         Ok(match self {
             Constant(constant) => visitor.visit_constant(constant)?,
             QualIdentifier(x) => visitor.visit_qual_identifier(x)?,
