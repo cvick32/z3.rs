@@ -31,6 +31,7 @@
 extern crate pomelo;
 
 pub mod concrete;
+mod let_extract;
 mod lexer;
 mod parser;
 pub mod renaming;
@@ -58,12 +59,8 @@ use concrete::SyntaxBuilder;
 /// A position in the input.
 pub use lexer::Position;
 
-pub fn get_commands(
-    content: BufReader<File>,
-    filename: String,
-) -> Vec<crate::concrete::Command> {
-    let command_stream =
-        CommandStream::new(content, SyntaxBuilder, Some(filename));
+pub fn get_commands(content: BufReader<File>, filename: String) -> Vec<crate::concrete::Command> {
+    let command_stream = CommandStream::new(content, SyntaxBuilder, Some(filename));
     let mut commands = vec![];
     for result in command_stream {
         match result {
@@ -73,7 +70,6 @@ pub fn get_commands(
     }
     commands
 }
-
 
 /// Parse the input data and return a stream of interpreted SMT2 commands
 pub struct CommandStream<R, T>

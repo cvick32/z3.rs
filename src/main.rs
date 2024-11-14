@@ -1,3 +1,4 @@
+use array_axioms::ArrayLanguage;
 use clap::Parser;
 use smt2parser::{get_commands, vmt::VMTModel};
 use z3::{Config, Context, Solver};
@@ -25,6 +26,9 @@ fn main() {
     let abstract_vmt_model = concrete_vmt_model.abstract_array_theory();
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
+
+    let mut egraph: egg::EGraph<ArrayLanguage, ()> = egg::EGraph::new(());
+
     for depth in 0..10 {
         println!("STARTING BMC FOR DEPTH {}", depth);
         for _d in 0..1 {
@@ -32,6 +36,16 @@ fn main() {
             let smt = abstract_vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
+            println!("{:#?}", smt.get_assert_terms());
+
+            for term in smt.get_assert_terms() {
+                println!("{term}");
+                egraph.add_expr(&term.parse().unwrap());
+            }
+
+            println!("{:?}", egraph.dump());
+            egraph.dot().to_pdf("babies_first_egraph.pdf").unwrap();
+
             match solver.check() {
                 z3::SatResult::Unsat => {
                     println!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
@@ -45,7 +59,7 @@ fn main() {
                 z3::SatResult::Sat => {
                     // find Array theory fact that rules out counterexample
                     let model = solver.get_model().unwrap();
-                    println!("{}", model);
+                    todo!("{}", model);
                     // Model to Egraph
                     // Find one or many theory violations
                     // Add violations as facts

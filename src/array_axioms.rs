@@ -3,9 +3,13 @@ use egg::*;
 define_language! {
     pub enum ArrayLanguage {
         Num(i64),
-        "K" = ConstArr([Id; 1]),
-        "Write" = Write([Id; 3]),
-        "Read" = Read([Id; 2]),
+        "ConstArr-Int-Int" = ConstArr([Id; 1]),
+        "Write-Int-Int" = Write([Id; 3]),
+        "Read-Int-Int" = Read([Id; 2]),
+        "and" = And(Box<[Id]>),
+        "not" = Not(Id),
+        "=" = Eq([Id; 2]),
+        ">=" = Geq([Id; 2]),
         Symbol(Symbol),
     }
 }

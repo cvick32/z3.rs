@@ -1,7 +1,10 @@
-use crate::{concrete::{Command, Term}, vmt::utils::{assert_term, assert_negation}};
+use crate::{
+    concrete::{Command, Term},
+    let_extract::LetExtract,
+    vmt::utils::{assert_negation, assert_term},
+};
 
-use super::{action::Action, bmc::BMCBuilder, variable::Variable, };
-
+use super::{action::Action, bmc::BMCBuilder, variable::Variable};
 
 #[derive(Default)]
 pub struct SMTProblem {
@@ -13,11 +16,11 @@ pub struct SMTProblem {
 }
 
 impl SMTProblem {
-    pub fn new(sorts: &Vec<Command>, function_definitions: &Vec<Command>) -> Self {
+    pub fn new(sorts: &[Command], function_definitions: &[Command]) -> Self {
         Self {
-            sorts: sorts.clone(),
+            sorts: sorts.to_vec(),
             variable_definitions: vec![],
-            function_definitions: function_definitions.clone(),
+            function_definitions: function_definitions.to_vec(),
             init_and_trans_assertions: vec![],
             property_assertion: None,
         }
@@ -29,8 +32,14 @@ impl SMTProblem {
 
     pub fn add_assertion(&mut self, condition: &Term, mut builder: BMCBuilder) {
         let rewritten_condition = match condition {
-            Term::Attributes { term, attributes: _ } => term.clone().accept(&mut builder).unwrap(),
-            _ => panic!("{}", "Assertion must be a Term::Atrributes! One of {{init, trans, invar-prop}}"),
+            Term::Attributes {
+                term,
+                attributes: _,
+            } => term.clone().accept(&mut builder).unwrap(),
+            _ => panic!(
+                "{}",
+                "Assertion must be a Term::Atrributes! One of {{init, trans, invar-prop}}"
+            ),
         };
         self.init_and_trans_assertions.push(rewritten_condition);
     }
@@ -38,8 +47,14 @@ impl SMTProblem {
     /// Need to assert the negation of the property given in the VMTModel for BMC.
     pub fn add_property_assertion(&mut self, condition: &Term, mut builder: BMCBuilder) {
         let rewritten_property = match condition {
-            Term::Attributes { term, attributes: _ } => term.clone().accept(&mut builder).unwrap(),
-            _ => panic!("{}", "Assertion must be a Term::Atrributes! One of {{init, trans, invar-prop}}"),
+            Term::Attributes {
+                term,
+                attributes: _,
+            } => term.clone().accept(&mut builder).unwrap(),
+            _ => panic!(
+                "{}",
+                "Assertion must be a Term::Atrributes! One of {{init, trans, invar-prop}}"
+            ),
         };
         self.property_assertion = Some(rewritten_property);
     }
@@ -59,6 +74,25 @@ impl SMTProblem {
             self.variable_definitions.push(action_at_time);
         }
     }
+
+    pub fn get_assert_terms(&self) -> Vec<String> {
+        let mut init_and_trans_asserts = self
+            .init_and_trans_assertions
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<String>>();
+
+        let mut let_extract = LetExtract::default();
+        self.property_assertion
+            .clone()
+            .unwrap()
+            .accept_term_visitor(&mut let_extract)
+            .unwrap();
+
+        init_and_trans_asserts.extend(let_extract.terms.into_iter().map(|x| x.to_string()));
+        init_and_trans_asserts
+    }
+
     pub fn to_smtlib2(&self) -> String {
         assert!(
             self.property_assertion.is_some(),
@@ -85,7 +119,7 @@ impl SMTProblem {
         let init_and_trans_asserts = self
             .init_and_trans_assertions
             .iter()
-            .map(|term| assert_term(term))
+            .map(assert_term)
             .collect::<Vec<String>>()
             .join("\n");
         let prop = self.property_assertion.clone().unwrap();

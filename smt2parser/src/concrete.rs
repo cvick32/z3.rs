@@ -491,6 +491,34 @@ impl<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort>
 }
 
 impl Term {
+    pub fn accept_term_visitor<V>(self, visitor: &mut V) -> Result<V::T, V::E>
+    where
+        V: TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort, T = Self>,
+        V::E: std::fmt::Debug,
+    {
+        use Term::*;
+        println!("blah: {self:?}");
+        Ok(match self {
+            Constant(constant) => visitor.visit_constant(constant)?,
+            QualIdentifier(x) => visitor.visit_qual_identifier(x)?,
+            Application {
+                qual_identifier,
+                arguments,
+            } => {
+                let arguments = arguments
+                    .into_iter()
+                    .map(|term| term.accept_term_visitor(visitor).unwrap())
+                    .collect();
+                visitor.visit_application(qual_identifier, arguments)?
+            }
+            Let { var_bindings, term } => visitor.visit_let(var_bindings, *term)?,
+            Forall { vars, term } => visitor.visit_forall(vars, *term)?,
+            Exists { vars, term } => visitor.visit_exists(vars, *term)?,
+            Match { term, cases } => visitor.visit_match(*term, cases)?,
+            Attributes { term, attributes } => visitor.visit_attributes(*term, attributes)?,
+        })
+    }
+
     /// Visit a concrete term.
     pub fn accept<V, T, E, S1, S2, S3, S4, S5, S6>(self, visitor: &mut V) -> Result<T, E>
     where
