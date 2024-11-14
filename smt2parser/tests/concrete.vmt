@@ -1,0 +1,29 @@
+(declare-fun a () (Array Int Int))
+(declare-fun new_a () (Array Int Int))
+(define-fun .a () (Array Int Int) (! a :next new_a))
+(declare-fun x () Int)
+(declare-fun new_x () Int)
+(define-fun .x () Int (! x :next new_x))
+(declare-fun y () Int)
+(declare-fun new_y () Int)
+(define-fun .y () Int (! y :next new_y))
+(declare-fun Z () Int)
+(declare-fun new_Z () Int)
+(define-fun .Z () Int (! Z :next new_Z))
+
+
+(define-fun init () Bool (!
+     (= a ((as const (Array Int Int)) Z))
+     :init true))
+
+(define-fun trans () Bool
+  (!
+  (and
+    (= new_a (store a x (select a y)))
+    (= new_Z Z)
+  )
+  :trans true))
+
+(define-fun property () Bool
+  (! (= (select a x) Z)
+     :invar-property 0))

@@ -1,0 +1,33 @@
+[package]
+name = "smt2parser"
+version = "0.6.1"
+description = "Generic parser library for the SMT-LIB-2 format"
+repository = "https://github.com/facebookincubator/smt2utils"
+documentation = "https://docs.rs/smt2parser"
+authors = ["Mathieu Baudet <mathieubaudet@fb.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["smt", "solver", "smt-lib"]
+categories = ["science"]
+edition = "2018"
+exclude = [
+    # Readme template that doesn't need to be included.
+    "README.tpl",
+]
+
+[dependencies]
+num = { version = "0.4.3", features = ["serde"] }
+pomelo = "0.1.5"
+structopt = "0.3.26"
+fst = "0.4.7"
+serde = { version = "1.0.210", features = ["derive"] }
+itertools = "0.13.0"
+thiserror = "1.0"
+rand = "0.8.5"
+permutation_iterator = "0.1.2"
+strum = { version = "0.26.3", features = ["derive"] }
+
+[[bin]]
+name = "smt2bin"
+path = "src/main.rs"
+test = false
