@@ -10,6 +10,8 @@ define_language! {
         "not" = Not(Id),
         "=" = Eq([Id; 2]),
         ">=" = Geq([Id; 2]),
+        "<" = Lt([Id; 2]),
+        "+" = Plus([Id; 2]),
         Symbol(Symbol),
     }
 }
