@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
 egg = "0.9.5"
+env_logger = "0.11.5"
 smt2parser = { path = "./smt2parser", version = "0.6.1" }
 z3 = "0.12.1"
 

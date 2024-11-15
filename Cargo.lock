@@ -253,7 +253,7 @@ version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96beaf9d35dbc4686bc86a4ecb851fd6a406f0bf32d9f646b1225a5c5cf5b5d7"
 dependencies = [
- "env_logger",
+ "env_logger 0.9.3",
  "fxhash",
  "hashbrown",
  "indexmap",
@@ -272,11 +272,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "60b1af1c220855b6ceac025d3f6ecdd2b7c4894bfe9cd9bda4fbb4bc7c0d4cf0"
 
 [[package]]
+name = "env_filter"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f2c92ceda6ceec50f43169f9ee8424fe2db276791afde7b2cd8bc084cb376ab"
+dependencies = [
+ "log",
+ "regex",
+]
+
+[[package]]
 name = "env_logger"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a12e6657c4c97ebab115a42dcee77225f7f482cdd841cf7088c657a42e9e00e7"
 dependencies = [
+ "log",
+]
+
+[[package]]
+name = "env_logger"
+version = "0.11.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e13fa619b91fb2381732789fc5de83b45675e882f66623b7d8cb4f643017018d"
+dependencies = [
+ "anstream",
+ "anstyle",
+ "env_filter",
+ "humantime",
  "log",
 ]
 
@@ -355,6 +378,12 @@ checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "humantime"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "indexmap"
@@ -1055,6 +1084,7 @@ version = "0.1.0"
 dependencies = [
  "clap 4.5.20",
  "egg",
+ "env_logger 0.11.5",
  "smt2parser",
  "z3",
 ]

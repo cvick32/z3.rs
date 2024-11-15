@@ -22,15 +22,31 @@ pub trait Saturate {
     fn saturate(&mut self);
 }
 
-impl Saturate for EGraph<ArrayLanguage, ()> {
+impl<N> Saturate for EGraph<ArrayLanguage, N>
+where
+    N: Analysis<ArrayLanguage> + Default + 'static,
+{
     fn saturate(&mut self) {
         let egraph = std::mem::take(self);
-        let runner = Runner::default().with_egraph(egraph).run(&array_axioms());
+        
+        let runner = Runner::default()
+            .with_egraph(egraph)
+            .with_hook(|runner| {
+                runner
+                    .iterations
+                    .iter()
+                    .for_each(|iter| println!("{:?}", iter.applied));
+                Ok(())
+            })
+            .run(&array_axioms());
         *self = runner.egraph;
     }
 }
 
-fn array_axioms() -> Vec<Rewrite<ArrayLanguage, ()>> {
+fn array_axioms<N>() -> Vec<Rewrite<ArrayLanguage, N>>
+where
+    N: Analysis<ArrayLanguage> + 'static,
+{
     vec![
         rewrite!("constant-array"; "(Read-Int-Int (ConstArr-Int-Int ?a) ?b)" => "?a"),
         rewrite!("read-after-write"; "(Read-Int-Int (Write-Int-Int ?a ?idx ?val) ?idx)" => "?val"),
@@ -38,10 +54,13 @@ fn array_axioms() -> Vec<Rewrite<ArrayLanguage, ()>> {
     ]
 }
 
-fn not_equal(
+fn not_equal<N>(
     index_0: &'static str,
     index_1: &'static str,
-) -> impl Fn(&mut EGraph<ArrayLanguage, ()>, Id, &Subst) -> bool {
+) -> impl Fn(&mut EGraph<ArrayLanguage, N>, Id, &Subst) -> bool
+where
+    N: Analysis<ArrayLanguage>,
+{
     let var_0 = index_0.parse().unwrap();
     let var_1 = index_1.parse().unwrap();
 
@@ -55,7 +74,9 @@ mod test {
     #[test]
     fn test_conditional_axioms0() {
         let expr: RecExpr<ArrayLanguage> = "(Read (Write A 0 0) 1)".parse().unwrap();
-        let runner = Runner::default().with_expr(&expr).run(&array_axioms());
+        let runner = Runner::default()
+            .with_expr(&expr)
+            .run(&array_axioms::<()>());
 
         let gold: RecExpr<ArrayLanguage> = "(Read A 1)".parse().unwrap();
         assert!(runner.egraph.lookup_expr(&gold).is_some())
@@ -64,7 +85,9 @@ mod test {
     #[test]
     fn test_conditional_axioms1() {
         let expr: RecExpr<ArrayLanguage> = "(Read (Write A 0 0) 0)".parse().unwrap();
-        let runner = Runner::default().with_expr(&expr).run(&array_axioms());
+        let runner = Runner::default()
+            .with_expr(&expr)
+            .run(&array_axioms::<()>());
 
         let gold: RecExpr<ArrayLanguage> = "(Read A 0)".parse().unwrap();
         assert!(runner.egraph.lookup_expr(&gold).is_none())
@@ -104,4 +127,32 @@ mod test {
 
         assert!(false);
     }
+}
+
+#[derive(Default)]
+pub struct SaturationInequalities {}
+
+impl Analysis<ArrayLanguage> for SaturationInequalities {
+    type Data = bool;
+
+    fn make(egraph: &EGraph<ArrayLanguage, Self>, enode: &ArrayLanguage) -> Self::Data {
+        false
+    }
+
+    fn merge(&mut self, a: &mut Self::Data, b: Self::Data) -> DidMerge {
+        *a = true;
+        DidMerge(false, true)
+    }
+
+    fn pre_union(
+        egraph: &EGraph<ArrayLanguage, Self>,
+        id1: Id,
+        id2: Id,
+        justification: &Option<Justification>,
+    ) {
+        //println!("{} == {}", id1, id2);
+        //println!("Because of: {:?}", justification);
+    }
+
+    fn modify(egraph: &mut EGraph<ArrayLanguage, Self>, id: Id) {}
 }
