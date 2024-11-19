@@ -25,8 +25,8 @@
 
 (define-fun init-conditions () Bool (!
  (and
-(= b (Const(Array Int Int) 1))
-(= c (Const(Array Int Int) 2))
+(= b ((as const (Array Int Int)) 1))
+(= c ((as const (Array Int Int)) 2))
 (= i 0)
 (= pc 1)
 ) :init true))

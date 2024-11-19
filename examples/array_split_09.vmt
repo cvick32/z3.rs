@@ -20,8 +20,8 @@
 (define-fun init-conditions () Bool (!
  (and
 (= i 0)
-(= a (Const(Array Int Int) 1))
-(= b (Const(Array Int Int) (- 1)))
+(= a ((as const (Array Int Int)) 1))
+(= b ((as const (Array Int Int)) (- 1)))
 ) :init true))
 
 (define-fun trans-conditions () Bool (!
