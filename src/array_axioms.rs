@@ -8,8 +8,11 @@ define_language! {
         "Read-Int-Int" = Read([Id; 2]),
         "and" = And(Box<[Id]>),
         "not" = Not(Id),
+        "=>" = Implies([Id; 2]),
         "=" = Eq([Id; 2]),
         ">=" = Geq([Id; 2]),
+        ">" = Gt([Id; 2]),
+        "<=" = Leq([Id; 2]),
         "<" = Lt([Id; 2]),
         "+" = Plus([Id; 2]),
         Symbol(Symbol),
@@ -73,23 +76,23 @@ mod test {
 
     #[test]
     fn test_conditional_axioms0() {
-        let expr: RecExpr<ArrayLanguage> = "(Read (Write A 0 0) 1)".parse().unwrap();
+        let expr: RecExpr<ArrayLanguage> = "(Read-Int-Int (Write-Int-Int A 0 0) 1)".parse().unwrap();
         let runner = Runner::default()
             .with_expr(&expr)
             .run(&array_axioms::<()>());
 
-        let gold: RecExpr<ArrayLanguage> = "(Read A 1)".parse().unwrap();
+        let gold: RecExpr<ArrayLanguage> = "(Read-Int-Int A 1)".parse().unwrap();
         assert!(runner.egraph.lookup_expr(&gold).is_some())
     }
 
     #[test]
     fn test_conditional_axioms1() {
-        let expr: RecExpr<ArrayLanguage> = "(Read (Write A 0 0) 0)".parse().unwrap();
+        let expr: RecExpr<ArrayLanguage> = "(Read-Int-Int (Write-Int-Int A 0 0) 0)".parse().unwrap();
         let runner = Runner::default()
             .with_expr(&expr)
             .run(&array_axioms::<()>());
 
-        let gold: RecExpr<ArrayLanguage> = "(Read A 0)".parse().unwrap();
+        let gold: RecExpr<ArrayLanguage> = "(Read-Int-Int A 0)".parse().unwrap();
         assert!(runner.egraph.lookup_expr(&gold).is_none())
     }
 
@@ -97,20 +100,20 @@ mod test {
     /// an instantiation of an axiom that proves this.
     ///
     /// Let's take this sample model that is obviously invalid. We'll construct this by
-    /// instantiating the terms `(Read (K 0) 0)` and `1` and unioning them in the
+    /// instantiating the terms `(Read-Int-Int (ConstArr-Int-Int 0) 0)` and `1` and unioning them in the
     /// egraph.
     ///
     /// ```
-    /// (Read (K 0) 0) = 1
+    /// (Read-Int-Int (ConstArr-Int-Int 0) 0) = 1
     /// ```
     ///
     /// Then I think that we want to get out an axiom instantiation that looks like
-    /// `(Read (K 0) 0) = 0` because that will rule out that union being possible.
+    /// `(Read-Int-Int (ConstArr-Int-Int 0) 0) = 0` because that will rule out that union being possible.
     #[test]
     fn invalid_const_array() {
         let mut egraph: EGraph<ArrayLanguage, _> = EGraph::new(()).with_explanations_enabled();
 
-        let read_term: RecExpr<ArrayLanguage> = "(Read (K 0) 0)".parse().unwrap();
+        let read_term: RecExpr<ArrayLanguage> = "(Read-Int-Int (ConstArr-Int-Int 0) 0)".parse().unwrap();
         let one_term: RecExpr<ArrayLanguage> = "1".parse().unwrap();
 
         let read_handle = egraph.add_expr(&read_term);
@@ -124,8 +127,6 @@ mod test {
 
         // println!("{:#?}", explanation.explanation_trees);
         println!("{}", explanation.get_flat_string());
-
-        assert!(false);
     }
 }
 

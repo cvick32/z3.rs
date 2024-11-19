@@ -83,13 +83,13 @@ impl SMTProblem {
             .collect::<Vec<String>>();
 
         let mut let_extract = LetExtract::default();
-        self.property_assertion
+        let extracted = self.property_assertion
             .clone()
             .unwrap()
             .accept_term_visitor(&mut let_extract)
             .unwrap();
 
-        init_and_trans_asserts.extend(let_extract.terms.into_iter().map(|x| x.to_string()));
+        init_and_trans_asserts.push(extracted.to_string());
         init_and_trans_asserts
     }
 

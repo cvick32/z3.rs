@@ -99,7 +99,7 @@ fn main() {
                         }
                         if fv.backward_rule.is_some() {
                             println!("forward: {:?}\nbackward: {:?}", fv.forward_rule, fv.backward_rule);
-                            fv.backward_rule.unwrap()
+                            fv.backward_rule.unwrap();
                         }
                     }
                     //egraph.dot().to_pdf("saturated.pdf").unwrap();
