@@ -1,4 +1,4 @@
-use array_axioms::{ArrayLanguage, Saturate, SaturationInequalities};
+use array_axioms::{ArrayLanguage, Saturate};
 use clap::Parser;
 use smt2parser::{get_commands, vmt::VMTModel};
 use z3::{Config, Context, Solver};
@@ -29,7 +29,7 @@ fn main() {
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
 
-    for depth in 0..3 {
+    for depth in 0..10 {
         println!("STARTING BMC FOR DEPTH {}", depth);
         for _d in 0..1 {
             // Currently run once, this will eventually run until UNSAT
@@ -37,7 +37,7 @@ fn main() {
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
-                egg::EGraph::new(SaturationInequalities {}).with_explanations_enabled();
+                egg::EGraph::new(()).with_explanations_enabled();
             for term in smt.get_assert_terms() {
                 egraph.add_expr(&term.parse().unwrap());
             }
@@ -89,10 +89,9 @@ fn main() {
                     }
                     egraph.rebuild();
                     //egraph.dot().to_pdf("unsaturated.pdf").unwrap();
-                    egraph.saturate();
+                    let instantiations = egraph.saturate();
                     //egraph.dot().to_pdf("saturated.pdf").unwrap();
                     println!("{:?}", egraph.dump());
-                    let instantiations = egraph.saturate();
                     println!("insts: {instantiations:?}");
                 }
             }
