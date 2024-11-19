@@ -113,8 +113,28 @@ where
         // let n = self
         //     .inner
         //     .apply_rewrite(iteration, egraph, rewrite, matches);
-        println!("applying {}", rewrite.name);
-        println!("<=====");
+        println!("<======");
         0
     }
+}
+
+/// TODO: This function should iterate over the nodes in the eclass and choose the variable 
+/// that has the highest score w.r.t some ranking function. I know there's some notion of 
+/// ranking that's built into egg, so maybe we can pre-compute this inside the EClass itself
+/// and just return `max()` here. 
+fn find_best_variable_substitution<L, N>(eclass: &egg::EClass<L, <N as Analysis<L>>::Data>) -> L
+where
+    L: egg::Language + std::fmt::Display,
+    N: egg::Analysis<L>,
+{    
+    for node in &eclass.nodes {
+        if node.to_string().contains("@") {
+            // Always return a variable if one is available.
+            return node.clone();
+        }
+    }
+    // TODO: How to handle function calls? Can recursively call this function on the children of a Node, 
+    // but I'm not sure how to construct a new Node from that.
+    println!("COULDN'T FIND A VARIABLE IN ECLASS: {:?}", eclass.nodes);
+    eclass.nodes[0].clone()
 }
