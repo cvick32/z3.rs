@@ -1,8 +1,10 @@
+use analysis::SaturationInequalities;
 use array_axioms::{ArrayLanguage, Saturate};
 use clap::Parser;
 use smt2parser::{get_commands, vmt::VMTModel};
 use z3::{Config, Context, Solver};
 
+mod analysis;
 mod array_axioms;
 mod conflict_scheduler;
 
@@ -25,19 +27,20 @@ fn main() {
     let content = std::io::BufReader::new(std::fs::File::open(options.filename.clone()).unwrap());
     let commands = get_commands(content, options.filename);
     let concrete_vmt_model = VMTModel::checked_from(commands).unwrap();
-    let abstract_vmt_model = concrete_vmt_model.abstract_array_theory();
+    let mut abstract_vmt_model = concrete_vmt_model.abstract_array_theory();
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
 
     for depth in 0..10 {
         println!("STARTING BMC FOR DEPTH {}", depth);
-        for _d in 0..1 {
+        loop {
             // Currently run once, this will eventually run until UNSAT
             let smt = abstract_vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
+            println!("{}", solver);
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
-                egg::EGraph::new(()).with_explanations_enabled();
+                egg::EGraph::new(SaturationInequalities {}).with_explanations_enabled();
             for term in smt.get_assert_terms() {
                 egraph.add_expr(&term.parse().unwrap());
             }
@@ -91,8 +94,10 @@ fn main() {
                     //egraph.dot().to_pdf("unsaturated.pdf").unwrap();
                     let instantiations = egraph.saturate();
                     //egraph.dot().to_pdf("saturated.pdf").unwrap();
-                    println!("{:?}", egraph.dump());
-                    println!("insts: {instantiations:?}");
+                    //println!("{:?}", egraph.dump());
+                    for inst in instantiations {
+                        abstract_vmt_model.add_instantiation(inst);
+                    }
                 }
             }
         }
