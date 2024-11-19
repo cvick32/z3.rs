@@ -12,6 +12,7 @@ define_language! {
         "Read-Int-Int" = Read([Id; 2]),
         "and" = And(Box<[Id]>),
         "not" = Not(Id),
+        "or" = Or(Box<[Id]>),
         "=>" = Implies([Id; 2]),
         "=" = Eq([Id; 2]),
         ">=" = Geq([Id; 2]),
@@ -20,6 +21,7 @@ define_language! {
         "<" = Lt([Id; 2]),
         "+" = Plus([Id; 2]),
         "-" = Negate(Box<[Id]>),
+        "*" = Times([Id; 2]),
         Symbol(Symbol),
     }
 }
