@@ -112,10 +112,10 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort> for Let
         arguments: Vec<Self::T>,
     ) -> Result<Self::T, Self::E> {
         if self.scope.is_empty() {
-        Ok(Term::Application {
-            qual_identifier,
-            arguments,
-        })
+            Ok(Term::Application {
+                qual_identifier,
+                arguments,
+            })
         } else {
             let new_arguments = arguments
                 .iter()
@@ -146,10 +146,10 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort> for Let
         term: Self::T,
     ) -> Result<Self::T, Self::E> {
         if self.scope.is_empty() {
-        Ok(Term::Forall {
-            vars,
-            term: Box::new(term),
-        })
+            Ok(Term::Forall {
+                vars,
+                term: Box::new(term),
+            })
         } else {
             let new_term = self.substitute_scoped_symbols(term);
             Ok(Term::Forall {
@@ -165,10 +165,10 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort> for Let
         term: Self::T,
     ) -> Result<Self::T, Self::E> {
         if self.scope.is_empty() {
-        Ok(Term::Exists {
-            vars,
-            term: Box::new(term),
-        })
+            Ok(Term::Exists {
+                vars,
+                term: Box::new(term),
+            })
         } else {
             let new_term = self.substitute_scoped_symbols(term);
             Ok(Term::Exists {
@@ -184,10 +184,10 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort> for Let
         cases: Vec<(Vec<Symbol>, Self::T)>,
     ) -> Result<Self::T, Self::E> {
         if self.scope.is_empty() {
-        Ok(Term::Match {
-            term: Box::new(term),
-            cases,
-        })
+            Ok(Term::Match {
+                term: Box::new(term),
+                cases,
+            })
         } else {
             let new_term = self.substitute_scoped_symbols(term);
             Ok(Term::Match {
@@ -206,9 +206,54 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort> for Let
         )>,
     ) -> Result<Self::T, Self::E> {
         if self.scope.is_empty() {
-        Ok(Term::Attributes {
-            term: Box::new(term),
-            attributes,
-        })
+            Ok(Term::Attributes {
+                term: Box::new(term),
+                attributes,
+            })
+        } else {
+            let new_term = self.substitute_scoped_symbols(term);
+            Ok(Term::Attributes {
+                term: Box::new(new_term),
+                attributes,
+            })
+        }
     }
+}
+
+mod test {
+
+    use super::*;
+
+    fn get_term_from_assert_command_string(assert_command: &[u8]) -> Term {
+        let stream = CommandStream::new(assert_command, SyntaxBuilder, None);
+        let commands = stream.collect::<Result<Vec<_>, _>>().unwrap();
+        match &commands[0] {
+            crate::concrete::Command::Assert { term } => term.clone(),
+            _ => panic!("Didn't give `get_term_from_assert_command_string` a string beginning with a command: {:?}", commands),
+        }
+    }
+
+    /// Have to pass a command-string to `test_term` because of CommandStream parsing. 
+    /// Easiest way to do this is to wrap whatever term you want to test inside of a 
+    /// call to `assert`.
+    macro_rules! create_let_test {
+        ($test_name:ident, $test_term:literal, $should_be:literal) => {
+            #[test]
+            fn $test_name() {
+                let term =
+                    get_term_from_assert_command_string($test_term);
+                let mut let_extract = LetExtract::default();
+                let new_term = term
+                    .clone()
+                    .accept_term_visitor(&mut let_extract)
+                    .unwrap();
+                assert!(new_term.to_string() == $should_be, "{} != {}", new_term, $should_be);
+            }
+        };
+    }
+
+    create_let_test!(test_no_let, b"(assert (let ((a 10)) 5))", "5");
+    create_let_test!(test_one_variable, b"(assert (let ((a (<= 10 0))) (and a)))", "(and (<= 10 0))");
+    create_let_test!(test_two_variables, b"(assert (let ((a 10) (b 0)) (<= a b)))", "(<= 10 0)");
+    create_let_test!(test_variable_usage, b"(assert (let ((a 10) (b (+ a 10))) (<= a b)))", "(<= 10 (+ 10 10))");
 }
