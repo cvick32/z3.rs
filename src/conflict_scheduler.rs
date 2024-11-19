@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use egg::Language;
+use egg::Analysis;
 
 #[derive(Clone)]
 pub struct ConflictScheduler<S> {
@@ -53,20 +53,24 @@ where
         matches: Vec<egg::SearchMatches<L>>,
     ) -> usize {
         println!("======>");
+        println!("applying {}", rewrite.name);
         for m in &matches {
-            println!("{m:#?}");
             if let Some(ast) = &m.ast {
                 let subst = &m.substs[0];
+                println!("cur sub: {:?}", subst);
                 let new: egg::RecExpr<_> = ast
                     .as_ref()
                     .as_ref()
                     .iter()
                     .map(|node| match node {
-                        egg::ENodeOrVar::ENode(node) => node.clone(),
+                        egg::ENodeOrVar::ENode(node) => {
+                            // FUNCTION CALL
+                            node.clone()
+                        }
                         egg::ENodeOrVar::Var(var) => {
                             // TODO: handle all found substs
                             let eclass = &egraph[*subst.get(*var).unwrap()];
-                            eclass.nodes[0].clone()
+                            find_best_variable_substitution::<L, N>(eclass)
                         }
                     })
                     .collect::<Vec<_>>()
@@ -93,9 +97,6 @@ where
                         .collect::<Vec<_>>()
                         .into();
 
-                    println!("{applier_ast:#?}");
-                    println!("{} => {}", new.pretty(80), new_rhs.pretty(80));
-
                     let blah = egraph.lookup_expr(&new_rhs);
                     // the eclass that we would have inserted from this pattern
                     // would cause a union from `blah` to `eclass`. This means it
@@ -103,13 +104,14 @@ where
                     // e-graph. This is a conflict, so we record the rule instantiation
                     // here.
                     if Some(m.eclass) != blah {
+                        println!("FOUND VIOLATION");
+                        println!("{applier_ast:#?}");
+                        println!("{} => {}", new.pretty(80), new_rhs.pretty(80));
                         self.instantiations.borrow_mut().push(new.pretty(80));
                     }
-                    println!("{blah:?}, {}", Some(m.eclass) == blah);
                 }
             }
         }
-
         // let n = self
         //     .inner
         //     .apply_rewrite(iteration, egraph, rewrite, matches);
