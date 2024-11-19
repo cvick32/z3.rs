@@ -81,7 +81,6 @@ impl SMTProblem {
             .init_and_trans_assertions
             .iter()
             .map(|term| {
-                println!("{}", term);
                 term.clone()
                     .accept_term_visitor(&mut let_extract)
                     .unwrap()
