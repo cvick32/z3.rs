@@ -4,6 +4,7 @@ use smt2parser::{get_commands, vmt::VMTModel};
 use z3::{Config, Context, Solver};
 
 mod array_axioms;
+mod conflict_scheduler;
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -35,12 +36,11 @@ fn main() {
             let smt = abstract_vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
-            let mut egraph: egg::EGraph<ArrayLanguage, _> = egg::EGraph::new(SaturationInequalities{}).with_explanations_enabled();
+            let mut egraph: egg::EGraph<ArrayLanguage, _> =
+                egg::EGraph::new(SaturationInequalities {}).with_explanations_enabled();
             for term in smt.get_assert_terms() {
-                println!("{term}");
                 egraph.add_expr(&term.parse().unwrap());
             }
-            println!("{:?}", egraph.dump());
             match solver.check() {
                 z3::SatResult::Unsat => {
                     println!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
@@ -87,22 +87,13 @@ fn main() {
                             }
                         }
                     }
-                    egraph.rebuild();   
+                    egraph.rebuild();
                     //egraph.dot().to_pdf("unsaturated.pdf").unwrap();
                     egraph.saturate();
-                    println!("{:?}", egraph.dump());
-                    let mut equiv = egraph.explain_equivalence(&"4".parse().unwrap(), &"5".parse().unwrap());
-                    println!("{}", equiv.get_string());
-                    for fv in equiv.make_flat_explanation() {
-                        if fv.forward_rule.is_some() {
-                            println!("forward: {:?}\nbackward: {:?}", fv.forward_rule, fv.backward_rule);
-                        }
-                        if fv.backward_rule.is_some() {
-                            println!("forward: {:?}\nbackward: {:?}", fv.forward_rule, fv.backward_rule);
-                            fv.backward_rule.unwrap();
-                        }
-                    }
                     //egraph.dot().to_pdf("saturated.pdf").unwrap();
+                    println!("{:?}", egraph.dump());
+                    let instantiations = egraph.saturate();
+                    println!("insts: {instantiations:?}");
                 }
             }
         }

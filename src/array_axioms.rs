@@ -1,4 +1,8 @@
+use std::rc::Rc;
+
 use egg::*;
+
+use crate::conflict_scheduler::ConflictScheduler;
 
 define_language! {
     pub enum ArrayLanguage {
@@ -15,6 +19,7 @@ define_language! {
         "<=" = Leq([Id; 2]),
         "<" = Lt([Id; 2]),
         "+" = Plus([Id; 2]),
+        "-" = Negate(Id),
         Symbol(Symbol),
     }
 }
@@ -22,27 +27,24 @@ define_language! {
 /// Trait for saturating an egraph with the array axioms. This hides the details of
 /// needing to create a runner every time you want to saturate a set of rules on an egraph.
 pub trait Saturate {
-    fn saturate(&mut self);
+    fn saturate(&mut self) -> Vec<String>;
 }
 
 impl<N> Saturate for EGraph<ArrayLanguage, N>
 where
     N: Analysis<ArrayLanguage> + Default + 'static,
 {
-    fn saturate(&mut self) {
+    fn saturate(&mut self) -> Vec<String> {
         let egraph = std::mem::take(self);
-        
-        let runner = Runner::default()
+        let scheduler = ConflictScheduler::new(BackoffScheduler::default());
+        let instantiations = scheduler.instantiations();
+        let mut runner = Runner::default()
             .with_egraph(egraph)
-            .with_hook(|runner| {
-                runner
-                    .iterations
-                    .iter()
-                    .for_each(|iter| println!("{:?}", iter.applied));
-                Ok(())
-            })
+            .with_scheduler(scheduler)
             .run(&array_axioms());
-        *self = runner.egraph;
+        *self = std::mem::take(&mut runner.egraph);
+        drop(runner);
+        Rc::into_inner(instantiations).unwrap().into_inner()
     }
 }
 
