@@ -231,6 +231,7 @@ mod test {
 
     use super::*;
 
+    #[allow(dead_code)]
     fn get_term_from_assert_command_string(assert_command: &[u8]) -> Term {
         let stream = CommandStream::new(assert_command, SyntaxBuilder, None);
         let commands = stream.collect::<Result<Vec<_>, _>>().unwrap();
