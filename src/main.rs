@@ -90,6 +90,7 @@ fn main() {
                     egraph.rebuild();
                     //egraph.dot().to_pdf("unsaturated.pdf").unwrap();
                     egraph.saturate();
+                    //egraph.dot().to_pdf("saturated.pdf").unwrap();
                     println!("{:?}", egraph.dump());
                     let instantiations = egraph.saturate();
                     println!("insts: {instantiations:?}");
