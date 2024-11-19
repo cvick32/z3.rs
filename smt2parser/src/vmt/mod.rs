@@ -3,12 +3,16 @@ use std::collections::HashMap;
 use action::Action;
 use array_abstractor::ArrayAbstractor;
 use bmc::BMCBuilder;
+use instantiator::Instantiator;
 use itertools::Itertools;
 use smt::SMTProblem;
 use utils::{get_transition_system_component, get_variables_and_actions};
 use variable::Variable;
 
-use crate::concrete::{Command, FunctionDec, Identifier, Sort, Symbol, SyntaxBuilder, Term};
+use crate::{
+    concrete::{Command, FunctionDec, Identifier, Sort, Symbol, SyntaxBuilder, Term},
+    get_term_from_assert_command_string,
+};
 
 static PROPERTY_ATTRIBUTE: &str = "invar-property";
 static TRANSITION_ATTRIBUTE: &str = "trans";
@@ -17,6 +21,7 @@ static INITIAL_ATTRIBUTE: &str = "init";
 mod action;
 mod array_abstractor;
 mod bmc;
+mod instantiator;
 mod smt;
 mod utils;
 mod variable;
@@ -238,5 +243,52 @@ impl VMTModel {
                 )
             })
             .collect()
+    }
+
+    pub fn add_instantiation(&mut self, inst: String) {
+        let mut instantiator = Instantiator {
+            visitor: SyntaxBuilder,
+            current_variables: self.get_all_current_variable_names(),
+            next_variables: self.get_all_next_variable_names(),
+        };
+        let inst_string = format!("(assert {})", inst);
+        println!("inst: {}", inst_string);
+        let inst_term = get_term_from_assert_command_string(inst_string.as_bytes());
+        println!("{}", inst_term);
+        let new_term = inst_term.clone().accept(&mut instantiator).unwrap();
+        println!("rewritten {}", new_term);
+        let (init_term, init_attr) = match self.initial_condition.clone() {
+            Term::Attributes { term, attributes } => (term, attributes),
+            _ => panic!("Initial Condition is not an Attributes"),
+        };
+        let (trans_term, trans_attr) = match self.transition_condition.clone() {
+            Term::Attributes { term, attributes } => (term, attributes),
+            _ => panic!("Transition Condition is not an Attriubtes"),
+        };
+
+        self.initial_condition = Term::Attributes {
+            term: Box::new(Term::Application {
+                qual_identifier: crate::concrete::QualIdentifier::Simple {
+                    identifier: Identifier::Simple {
+                        symbol: Symbol(format!("and")),
+                    },
+                },
+                arguments: vec![new_term.clone(), *init_term],
+            }),
+            attributes: init_attr,
+        };
+        self.transition_condition = Term::Attributes {
+            term: Box::new(Term::Application {
+                qual_identifier: crate::concrete::QualIdentifier::Simple {
+                    identifier: Identifier::Simple {
+                        symbol: Symbol(format!("and")),
+                    },
+                },
+                arguments: vec![new_term.clone(), *trans_term],
+            }),
+            attributes: trans_attr,
+        };
+        println!("new init: {}", self.initial_condition);
+        println!("new trans: {}", self.transition_condition);
     }
 }
