@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use crate::{
-    concrete::{Constant, Keyword, QualIdentifier, SExpr, Sort, Symbol, SyntaxBuilder, Term},
+    concrete::{Constant, Keyword, QualIdentifier, SExpr, Sort, Symbol, Term},
     visitors::TermVisitor,
-    CommandStream, Error,
+    Error,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -229,17 +229,10 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort> for Let
 
 mod test {
 
+    #[allow(unused_imports)]
     use super::*;
-
-    #[allow(dead_code)]
-    fn get_term_from_assert_command_string(assert_command: &[u8]) -> Term {
-        let stream = CommandStream::new(assert_command, SyntaxBuilder, None);
-        let commands = stream.collect::<Result<Vec<_>, _>>().unwrap();
-        match &commands[0] {
-            crate::concrete::Command::Assert { term } => term.clone(),
-            _ => panic!("Didn't give `get_term_from_assert_command_string` a string beginning with a command: {:?}", commands),
-        }
-    }
+    #[allow(unused_imports)]
+    use crate::get_term_from_assert_command_string;
 
     /// Have to pass a command-string to `test_term` because of CommandStream parsing.
     /// Easiest way to do this is to wrap whatever term you want to test inside of a

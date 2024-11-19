@@ -55,7 +55,7 @@ use std::{fs::File, io::BufReader};
 
 /// A minimal error type.
 pub use concrete::Error;
-use concrete::SyntaxBuilder;
+use concrete::{SyntaxBuilder, Term};
 /// A position in the input.
 pub use lexer::Position;
 
@@ -69,6 +69,15 @@ pub fn get_commands(content: BufReader<File>, filename: String) -> Vec<crate::co
         }
     }
     commands
+}
+
+pub fn get_term_from_assert_command_string(assert_command: &[u8]) -> Term {
+    let stream = CommandStream::new(assert_command, SyntaxBuilder, None);
+    let commands = stream.collect::<Result<Vec<_>, _>>().unwrap();
+    match &commands[0] {
+            crate::concrete::Command::Assert { term } => term.clone(),
+            _ => panic!("Didn't give `get_term_from_assert_command_string` a string beginning with a command: {:?}", commands),
+        }
 }
 
 /// Parse the input data and return a stream of interpreted SMT2 commands
