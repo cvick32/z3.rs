@@ -16,7 +16,7 @@ impl Variable {
                 parameters: _,
                 sort: _,
             } => {
-                return &symbol.0;
+                &symbol.0
             }
             _ => panic!("Variable's current Command must be DeclareFun."),
         }
@@ -29,7 +29,7 @@ impl Variable {
                 parameters: _,
                 sort: _,
             } => {
-                return &symbol.0;
+                &symbol.0
             }
             _ => panic!("Variable's next Command must be DeclareFun."),
         }

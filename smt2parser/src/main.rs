@@ -105,10 +105,10 @@ fn main() -> std::io::Result<()> {
                 Ok(vm) => {
                     vm.print_stats();
                     println!("{}", vm.as_vmt_string());
-                    let smt = vm.unroll(10);
+                    let _smt = vm.unroll(10);
                     let abs = vm.abstract_array_theory();
                     println!("{}", abs.as_vmt_string());
-                    let abs_smt = abs.unroll(10);
+                    let _abs_smt = abs.unroll(10);
 
                 }
                 Err(_) => panic!("Could not parse VMT."),

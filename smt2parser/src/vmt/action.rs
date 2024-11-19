@@ -16,7 +16,7 @@ impl Action {
                 parameters: _,
                 sort: _,
             } => {
-                return &symbol.0;
+                &symbol.0
             }
             _ => panic!("Actions's Command must be DeclareFun."),
         }

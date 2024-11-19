@@ -105,7 +105,7 @@ pub fn get_transition_system_component(command: &Command, attribute: &str) -> Te
                             command, attribute
                         );
                     }
-                    return Term::Attributes { term: term.clone(), attributes: attributes.clone() }
+                    Term::Attributes { term: term.clone(), attributes: attributes.clone() }
                 }
                 _ => panic!("{}: Must have attribute.", attribute),
             },
