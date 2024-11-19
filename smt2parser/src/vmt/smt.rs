@@ -76,21 +76,28 @@ impl SMTProblem {
     }
 
     pub fn get_assert_terms(&self) -> Vec<String> {
-        let mut init_and_trans_asserts = self
+        let mut let_extract = LetExtract::default();
+        let mut assert_terms = self
             .init_and_trans_assertions
             .iter()
-            .map(ToString::to_string)
+            .map(|term| {
+                println!("{}", term);
+                term.clone()
+                    .accept_term_visitor(&mut let_extract)
+                    .unwrap()
+                    .to_string()
+            })
             .collect::<Vec<String>>();
-
-        let mut let_extract = LetExtract::default();
-        let extracted = self.property_assertion
-            .clone()
-            .unwrap()
-            .accept_term_visitor(&mut let_extract)
-            .unwrap();
-
-        init_and_trans_asserts.push(extracted.to_string());
-        init_and_trans_asserts
+        if self.property_assertion.is_some() {
+            let extracted = self
+                .property_assertion
+                .clone()
+                .unwrap()
+                .accept_term_visitor(&mut let_extract)
+                .unwrap();
+            assert_terms.push(extracted.to_string());
+        }
+        assert_terms
     }
 
     pub fn to_smtlib2(&self) -> String {
