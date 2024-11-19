@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    concrete::{
-        Constant, Keyword, QualIdentifier, SExpr, Sort, Symbol, SyntaxBuilder, Term,
-    },
+    concrete::{Constant, Keyword, QualIdentifier, SExpr, Sort, Symbol, SyntaxBuilder, Term},
     visitors::TermVisitor,
     CommandStream, Error,
 };
@@ -86,7 +84,10 @@ impl LetExtract {
                     attributes,
                 }
             }
-            Term::Let { var_bindings, term } => panic!("SHOULD NEVER CALL THIS WITH LET!"),
+            Term::Let {
+                var_bindings: _,
+                term: _,
+            } => panic!("SHOULD NEVER CALL THIS WITH LET!"),
         }
     }
 }
@@ -134,10 +135,16 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort> for Let
         term: Self::T,
     ) -> Result<Self::T, Self::E> {
         for (var, term) in &var_bindings {
+            // Pop on the scope
             let new_term = self.substitute_scoped_symbols(term.clone());
             self.scope.insert(var.clone(), new_term);
         }
-        Ok(self.substitute_scoped_symbols(term))
+        let new_term = self.substitute_scoped_symbols(term);
+        for (var, _) in &var_bindings {
+            // Pop off the scope
+            self.scope.remove(var);
+        }
+        Ok(new_term)
     }
 
     fn visit_forall(
@@ -233,27 +240,42 @@ mod test {
         }
     }
 
-    /// Have to pass a command-string to `test_term` because of CommandStream parsing. 
-    /// Easiest way to do this is to wrap whatever term you want to test inside of a 
+    /// Have to pass a command-string to `test_term` because of CommandStream parsing.
+    /// Easiest way to do this is to wrap whatever term you want to test inside of a
     /// call to `assert`.
     macro_rules! create_let_test {
         ($test_name:ident, $test_term:literal, $should_be:literal) => {
             #[test]
             fn $test_name() {
-                let term =
-                    get_term_from_assert_command_string($test_term);
+                let term = get_term_from_assert_command_string($test_term);
                 let mut let_extract = LetExtract::default();
-                let new_term = term
-                    .clone()
-                    .accept_term_visitor(&mut let_extract)
-                    .unwrap();
-                assert!(new_term.to_string() == $should_be, "{} != {}", new_term, $should_be);
+                let new_term = term.clone().accept_term_visitor(&mut let_extract).unwrap();
+                assert!(
+                    new_term.to_string() == $should_be,
+                    "{} != {}",
+                    new_term,
+                    $should_be
+                );
             }
         };
     }
 
     create_let_test!(test_no_let, b"(assert (let ((a 10)) 5))", "5");
-    create_let_test!(test_one_variable, b"(assert (let ((a (<= 10 0))) (and a)))", "(and (<= 10 0))");
-    create_let_test!(test_two_variables, b"(assert (let ((a 10) (b 0)) (<= a b)))", "(<= 10 0)");
-    create_let_test!(test_variable_usage, b"(assert (let ((a 10) (b (+ a 10))) (<= a b)))", "(<= 10 (+ 10 10))");
+    create_let_test!(
+        test_one_variable,
+        b"(assert (let ((a (<= 10 0))) (and a)))",
+        "(and (<= 10 0))"
+    );
+    create_let_test!(
+        test_two_variables,
+        b"(assert (let ((a 10) (b 0)) (<= a b)))",
+        "(<= 10 0)"
+    );
+    create_let_test!(
+        test_variable_usage,
+        b"(assert (let ((a 10) (b (+ a 10))) (<= a b)))",
+        "(<= 10 (+ 10 10))"
+    );
+    create_let_test!(test_actual_usage, b"(assert (and (let ((a!1 (not (not (= (Read-Int-Int c@1 Z@1) 99))))) (=> (and (>= i@1 N@1) (>= Z@1 100) (< Z@1 N@1)) (and a!1)))))", "(and (=> (and (>= i@1 N@1) (>= Z@1 100) (< Z@1 N@1)) (and (not (not (= (Read-Int-Int c@1 Z@1) 99))))))");
+    create_let_test!(test_transition_use, b"(assert (and (let ((a!1 (= (Write-Int-Int c@0 i@0 (+ i@0 (Read-Int-Int a@0 i@0))) c@1)) (a!2 (= (Write-Int-Int c@0 i@0 (Read-Int-Int c@0 (- i@0 1))) c@1))) (and (=> (< i@0 100) a!1) (=> (not (< i@0 100)) a!2))) (< i@0 N@0) (= (+ i@0 1) i@1) (= a@0 a@1) (= N@0 N@1) (= Z@0 Z@1)))", "(and (and (=> (< i@0 100) (= (Write-Int-Int c@0 i@0 (+ i@0 (Read-Int-Int a@0 i@0))) c@1)) (=> (not (< i@0 100)) (= (Write-Int-Int c@0 i@0 (Read-Int-Int c@0 (- i@0 1))) c@1))) (< i@0 N@0) (= (+ i@0 1) i@1) (= a@0 a@1) (= N@0 N@1) (= Z@0 Z@1))");
 }
