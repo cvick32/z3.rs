@@ -1,6 +1,5 @@
 use crate::concrete::Command;
 
-
 #[derive(Clone, Debug)]
 pub struct Variable {
     pub current: Command,
@@ -15,9 +14,7 @@ impl Variable {
                 symbol,
                 parameters: _,
                 sort: _,
-            } => {
-                &symbol.0
-            }
+            } => &symbol.0,
             _ => panic!("Variable's current Command must be DeclareFun."),
         }
     }
@@ -28,14 +25,16 @@ impl Variable {
                 symbol,
                 parameters: _,
                 sort: _,
-            } => {
-                &symbol.0
-            }
+            } => &symbol.0,
             _ => panic!("Variable's next Command must be DeclareFun."),
         }
     }
-    
+
     pub(crate) fn as_commands(&self) -> Vec<Command> {
-        vec![self.current.clone(), self.next.clone(), self.relationship.clone()]
+        vec![
+            self.current.clone(),
+            self.next.clone(),
+            self.relationship.clone(),
+        ]
     }
 }

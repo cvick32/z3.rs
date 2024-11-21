@@ -514,29 +514,34 @@ pub(crate) mod tests {
 
     #[test]
     fn test_attributes() {
-        let value = parse_tokens(Lexer::new(&b"(define-fun property () Bool (! (> Z 0) :invar-property 0))"[..])).unwrap();
+        let value = parse_tokens(Lexer::new(
+            &b"(define-fun property () Bool (! (> Z 0) :invar-property 0))"[..],
+        ))
+        .unwrap();
 
         match value {
-              Command::DefineFun { sig: _ , term } => {
-                match term {
-                    Term::Attributes { term: _, attributes } => {
-                        assert!(attributes.len() == 1);
-                        let keyword = &attributes[0].0.0;
-                        assert!(keyword == "invar-property");
-                        let value = &attributes[0].1;
-                        match value {
-                            AttributeValue::Constant(c) => match c {
-                                Constant::Numeral(big_uint) => assert!(big_uint.eq(&BigUint::from(0 as u8))),
-                                _ => assert!(false)
+            Command::DefineFun { sig: _, term } => match term {
+                Term::Attributes {
+                    term: _,
+                    attributes,
+                } => {
+                    assert!(attributes.len() == 1);
+                    let keyword = &attributes[0].0 .0;
+                    assert!(keyword == "invar-property");
+                    let value = &attributes[0].1;
+                    match value {
+                        AttributeValue::Constant(c) => match c {
+                            Constant::Numeral(big_uint) => {
+                                assert!(big_uint.eq(&BigUint::from(0 as u8)))
                             }
-                            _ => assert!(false)
-                        }
+                            _ => assert!(false),
+                        },
+                        _ => assert!(false),
                     }
-                    _ => assert!(false)
                 }
-              }
-              _ => assert!(false)
-  
+                _ => assert!(false),
+            },
+            _ => assert!(false),
         };
     }
 }

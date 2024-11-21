@@ -4,7 +4,6 @@ use crate::concrete::{Command, Term};
 
 use super::{action::Action, variable::Variable};
 
-
 pub fn assert_term(term: &Term) -> String {
     format!("(assert {})", term)
 }
@@ -95,17 +94,17 @@ pub fn get_transition_system_component(command: &Command, attribute: &str) -> Te
     if command_has_attribute_string(command, attribute) {
         match command {
             Command::DefineFun { sig: _, term } => match term {
-                Term::Attributes {
-                    term,
-                    attributes,
-                } => {
-                    if attributes[0].0.0 != attribute {
+                Term::Attributes { term, attributes } => {
+                    if attributes[0].0 .0 != attribute {
                         panic!(
                             "Ill-formed system component: {}.\nShould have {} as attribute.",
                             command, attribute
                         );
                     }
-                    Term::Attributes { term: term.clone(), attributes: attributes.clone() }
+                    Term::Attributes {
+                        term: term.clone(),
+                        attributes: attributes.clone(),
+                    }
                 }
                 _ => panic!("{}: Must have attribute.", attribute),
             },

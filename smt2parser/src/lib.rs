@@ -51,13 +51,21 @@ pub type Hexadecimal = Vec<Nibble>;
 /// SMT2 binary values.
 pub type Binary = Vec<bool>;
 
-use std::{fs::File, io::BufReader};
+use std::{fs::File, io::BufReader, path::PathBuf};
 
 /// A minimal error type.
 pub use concrete::Error;
 use concrete::{SyntaxBuilder, Term};
 /// A position in the input.
 pub use lexer::Position;
+use vmt::{VMTError, VMTModel};
+
+pub fn get_vmt_from_path(input: &PathBuf) -> Result<VMTModel, VMTError> {
+    let filename = String::from(input.to_str().unwrap());
+    let content = std::io::BufReader::new(std::fs::File::open(&input).unwrap());
+    let commands = get_commands(content, filename);
+    VMTModel::checked_from(commands)
+}
 
 pub fn get_commands(content: BufReader<File>, filename: String) -> Vec<crate::concrete::Command> {
     let command_stream = CommandStream::new(content, SyntaxBuilder, Some(filename));

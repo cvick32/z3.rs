@@ -107,7 +107,9 @@ where
                         println!("FOUND VIOLATION");
                         println!("{applier_ast:#?}");
                         println!("{} => {}", new.pretty(80), new_rhs.pretty(80));
-                        self.instantiations.borrow_mut().push(format!("(= {} {})", new, new_rhs));
+                        self.instantiations
+                            .borrow_mut()
+                            .push(format!("(= {} {})", new, new_rhs));
                     }
                 }
             }

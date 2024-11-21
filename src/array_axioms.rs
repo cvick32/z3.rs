@@ -80,7 +80,8 @@ mod test {
 
     #[test]
     fn test_conditional_axioms0() {
-        let expr: RecExpr<ArrayLanguage> = "(Read-Int-Int (Write-Int-Int A 0 0) 1)".parse().unwrap();
+        let expr: RecExpr<ArrayLanguage> =
+            "(Read-Int-Int (Write-Int-Int A 0 0) 1)".parse().unwrap();
         let runner = Runner::default()
             .with_expr(&expr)
             .run(&array_axioms::<()>());
@@ -91,7 +92,8 @@ mod test {
 
     #[test]
     fn test_conditional_axioms1() {
-        let expr: RecExpr<ArrayLanguage> = "(Read-Int-Int (Write-Int-Int A 0 0) 0)".parse().unwrap();
+        let expr: RecExpr<ArrayLanguage> =
+            "(Read-Int-Int (Write-Int-Int A 0 0) 0)".parse().unwrap();
         let runner = Runner::default()
             .with_expr(&expr)
             .run(&array_axioms::<()>());
@@ -117,7 +119,8 @@ mod test {
     fn invalid_const_array() {
         let mut egraph: EGraph<ArrayLanguage, _> = EGraph::new(()).with_explanations_enabled();
 
-        let read_term: RecExpr<ArrayLanguage> = "(Read-Int-Int (ConstArr-Int-Int 0) 0)".parse().unwrap();
+        let read_term: RecExpr<ArrayLanguage> =
+            "(Read-Int-Int (ConstArr-Int-Int 0) 0)".parse().unwrap();
         let one_term: RecExpr<ArrayLanguage> = "1".parse().unwrap();
 
         let read_handle = egraph.add_expr(&read_term);

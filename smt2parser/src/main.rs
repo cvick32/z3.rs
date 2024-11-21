@@ -4,13 +4,15 @@
 #![forbid(unsafe_code)]
 
 use smt2parser::{
-    concrete::SyntaxBuilder, get_commands, renaming::{SymbolNormalizer, SymbolNormalizerConfig, TesterModernizer}, stats::Smt2Counters, CommandStream
+    concrete::SyntaxBuilder,
+    get_vmt_from_path,
+    renaming::{SymbolNormalizer, SymbolNormalizerConfig, TesterModernizer},
+    stats::Smt2Counters,
+    CommandStream,
 };
 use std::path::PathBuf;
 use structopt::StructOpt;
 use strum::IntoEnumIterator;
-
-use smt2parser::vmt::VMTModel;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -97,10 +99,7 @@ fn main() -> std::io::Result<()> {
     let options = Options::from_args();
     match options.operation {
         Operation::Vmt { input } => {
-            let filename = String::from(input.to_str().unwrap());
-            let content = std::io::BufReader::new(std::fs::File::open(&input)?);
-            let commands = get_commands(content, filename);
-            let vmt_model = VMTModel::checked_from(commands);
+            let vmt_model = get_vmt_from_path(&input);
             match vmt_model {
                 Ok(vm) => {
                     vm.print_stats();
@@ -109,7 +108,6 @@ fn main() -> std::io::Result<()> {
                     let abs = vm.abstract_array_theory();
                     println!("{}", abs.as_vmt_string());
                     let _abs_smt = abs.unroll(10);
-
                 }
                 Err(_) => panic!("Could not parse VMT."),
             }

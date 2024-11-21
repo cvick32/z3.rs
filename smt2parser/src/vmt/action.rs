@@ -1,7 +1,5 @@
 use crate::concrete::Command;
 
-
-
 #[derive(Clone, Debug)]
 pub struct Action {
     pub action: Command,
@@ -15,13 +13,11 @@ impl Action {
                 symbol,
                 parameters: _,
                 sort: _,
-            } => {
-                &symbol.0
-            }
+            } => &symbol.0,
             _ => panic!("Actions's Command must be DeclareFun."),
         }
     }
-    
+
     pub(crate) fn as_commands(&self) -> Vec<Command> {
         //(define-fun .grantExclusiveRule () Bool (! grantExclusiveRule :action 0))
         vec![self.action.clone(), self.relationship.clone()]
