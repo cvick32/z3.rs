@@ -303,7 +303,7 @@ impl VMTModel {
         let instance_term = self.get_instance_term(inst);
         let mut frame_getter = FrameNumGetter::new();
         instance_term.clone().accept(&mut frame_getter).unwrap();
-        if frame_getter.frame_nums.len() > 2 {
+        if frame_getter.frame_nums.len() > 2 || frame_getter.max_min_difference() > 1 {
             println!("NEED TO INSTANTIATE WITH PROPHECY");
             return;
         }

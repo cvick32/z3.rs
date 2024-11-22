@@ -34,10 +34,6 @@ impl crate::rewriter::Rewriter for Instantiator {
             if &time == self.frames.first().unwrap() {
                 Ok(Symbol(format!("{}", variable_name)))
             } else if &time == self.frames.last().unwrap() {
-                match self.current_to_next_variables.get(variable_name) {
-                    Some(_) => (),
-                    None => println!("{:?}: {}", self.current_to_next_variables, variable_name),
-                }
                 Ok(Symbol(format!(
                     "{}",
                     self.current_to_next_variables.get(variable_name).unwrap()
