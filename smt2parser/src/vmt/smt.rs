@@ -100,10 +100,6 @@ impl SMTProblem {
     }
 
     pub fn to_smtlib2(&self) -> String {
-        assert!(
-            self.property_assertion.is_some(),
-            "No property assertion for SMTProblem!"
-        );
         let sort_names = self
             .sorts
             .iter()
@@ -128,8 +124,12 @@ impl SMTProblem {
             .map(assert_term)
             .collect::<Vec<String>>()
             .join("\n");
-        let prop = self.property_assertion.clone().unwrap();
-        let property_assert = assert_negation(&prop);
+        let property_assert = match &self.property_assertion {
+            Some(prop) => {
+                assert_negation(&prop)
+            }
+            None => format!("")
+        };
         format!(
             "{}\n{}\n{}\n{}\n{}",
             sort_names, function_definitions, defs, init_and_trans_asserts, property_assert

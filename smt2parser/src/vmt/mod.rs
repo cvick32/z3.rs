@@ -24,7 +24,7 @@ mod bmc;
 mod instantiator;
 mod smt;
 mod utils;
-mod variable;
+pub mod variable;
 
 /// VMTModel represents a transition system given in VMT format.
 /// The VMT specification is no longer available but there is an example here:
@@ -150,6 +150,48 @@ impl VMTModel {
             smt_problem.init_and_trans_length(),
             length
         );
+        smt_problem
+    }
+
+    pub fn get_initial_term(&self) -> SMTProblem {
+        let builder = BMCBuilder {
+            visitor: SyntaxBuilder,
+            current_variables: self.get_all_current_variable_names(),
+            next_variables: self.get_all_next_variable_names(),
+            step: 0,
+        };
+        let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
+        smt_problem.add_variable_definitions(
+            &self.state_variables,
+            &self.actions,
+            builder.clone(),
+        );
+        smt_problem.add_assertion(&self.initial_condition, builder.clone());
+        smt_problem
+    }
+
+    pub fn get_trans_term(&self) -> SMTProblem {
+        let mut builder = BMCBuilder {
+            visitor: SyntaxBuilder,
+            current_variables: self.get_all_current_variable_names(),
+            next_variables: self.get_all_next_variable_names(),
+            step: 0,
+        };
+        let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
+
+        smt_problem.add_assertion(&self.initial_condition, builder.clone());
+        for _ in 0..1 {
+            // Must add variable definitions for each variable at each time step.
+            smt_problem.add_variable_definitions(
+                &self.state_variables,
+                &self.actions,
+                builder.clone(),
+            );
+            smt_problem.add_assertion(&self.transition_condition, builder.clone());
+            builder.add_step();
+        }
+        // Don't forget the variable definitions at time `length`.
+        smt_problem.add_variable_definitions(&self.state_variables, &self.actions, builder.clone());
         smt_problem
     }
 
@@ -290,5 +332,20 @@ impl VMTModel {
         };
         println!("new init: {}", self.initial_condition);
         println!("new trans: {}", self.transition_condition);
+    }
+    
+    pub fn get_parametric_sort_names(&self) -> Vec<String> {
+        self.sorts.iter().map(|sort| {
+            match sort {
+                Command::DeclareSort { symbol, arity: _ } => {
+                    symbol.0.clone()
+                },
+                _ => panic!("Sort in VMTModel is not of type DefineSort!: {}", sort),
+            }
+        }).collect::<Vec<_>>()
+    }
+    
+    pub fn get_state_holding_vars(&self) -> Vec<Variable> {
+        self.state_variables.clone()
     }
 }
