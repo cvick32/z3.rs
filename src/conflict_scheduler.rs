@@ -1,6 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use egg::Analysis;
+use log::debug;
 use smt2parser::vmt::VARIABLE_FRAME_DELIMITER;
 
 #[derive(Clone)]
@@ -58,7 +59,7 @@ where
         for m in &matches {
             if let Some(ast) = &m.ast {
                 let subst = &m.substs[0];
-                println!("cur sub: {:?}", subst);
+                debug!("cur sub: {:?}", subst);
                 let new: egg::RecExpr<_> = ast
                     .as_ref()
                     .as_ref()
@@ -106,7 +107,7 @@ where
                     // here.
                     if Some(m.eclass) != blah {
                         println!("FOUND VIOLATION");
-                        println!("{applier_ast:#?}");
+                        debug!("{applier_ast:#?}");
                         println!("{} => {}", new.pretty(80), new_rhs.pretty(80));
                         self.instantiations
                             .borrow_mut()

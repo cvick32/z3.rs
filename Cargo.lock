@@ -1085,6 +1085,7 @@ dependencies = [
  "clap 4.5.20",
  "egg",
  "env_logger 0.11.5",
+ "log",
  "smt2parser",
  "z3",
 ]

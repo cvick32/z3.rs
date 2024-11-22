@@ -38,7 +38,7 @@ fn main() {
             let smt = abstract_vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
-            println!("{}", solver);
+            debug!("{}", solver);
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
                 egg::EGraph::new(SaturationInequalities {}).with_explanations_enabled();
             for term in smt.get_assert_terms() {
@@ -57,7 +57,7 @@ fn main() {
                 z3::SatResult::Sat => {
                     // find Array theory fact that rules out counterexample
                     let model = solver.get_model().unwrap();
-                    println!("{}", model);
+                    debug!("{}", model);
 
                     for func_decl in model.iter() {
                         if func_decl.arity() == 0 {
