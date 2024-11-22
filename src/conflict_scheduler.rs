@@ -1,6 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use egg::Analysis;
+use smt2parser::vmt::VARIABLE_FRAME_DELIMITER;
 
 #[derive(Clone)]
 pub struct ConflictScheduler<S> {
@@ -132,7 +133,7 @@ where
     N: egg::Analysis<L>,
 {
     for node in &eclass.nodes {
-        if node.to_string().contains("@") {
+        if node.to_string().contains(VARIABLE_FRAME_DELIMITER) {
             // Always return a variable if one is available.
             return node.clone();
         }

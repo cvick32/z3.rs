@@ -3,10 +3,11 @@ use std::collections::HashMap;
 use action::Action;
 use array_abstractor::ArrayAbstractor;
 use bmc::BMCBuilder;
+use frame_num_getter::FrameNumGetter;
 use instantiator::Instantiator;
 use itertools::Itertools;
 use smt::SMTProblem;
-use utils::{get_transition_system_component, get_variables_and_actions};
+use utils::{get_and_terms, get_transition_system_component, get_variables_and_actions};
 use variable::Variable;
 
 use crate::{
@@ -21,10 +22,13 @@ static INITIAL_ATTRIBUTE: &str = "init";
 mod action;
 mod array_abstractor;
 mod bmc;
+mod frame_num_getter;
 mod instantiator;
 mod smt;
 mod utils;
 pub mod variable;
+
+pub static VARIABLE_FRAME_DELIMITER: &str = "@";
 
 /// VMTModel represents a transition system given in VMT format.
 /// The VMT specification is no longer available but there is an example here:
@@ -125,7 +129,7 @@ impl VMTModel {
         let mut builder = BMCBuilder {
             visitor: SyntaxBuilder,
             current_variables: self.get_all_current_variable_names(),
-            next_variables: self.get_all_next_variable_names(),
+            next_variables: self.get_next_to_current_varible_names(),
             step: 0,
         };
         let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
@@ -157,7 +161,7 @@ impl VMTModel {
         let builder = BMCBuilder {
             visitor: SyntaxBuilder,
             current_variables: self.get_all_current_variable_names(),
-            next_variables: self.get_all_next_variable_names(),
+            next_variables: self.get_next_to_current_varible_names(),
             step: 0,
         };
         let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
@@ -170,7 +174,7 @@ impl VMTModel {
         let mut builder = BMCBuilder {
             visitor: SyntaxBuilder,
             current_variables: self.get_all_current_variable_names(),
-            next_variables: self.get_all_next_variable_names(),
+            next_variables: self.get_next_to_current_varible_names(),
             step: 0,
         };
         let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
@@ -271,7 +275,7 @@ impl VMTModel {
         state_variable_names
     }
 
-    fn get_all_next_variable_names(&self) -> HashMap<String, String> {
+    fn get_next_to_current_varible_names(&self) -> HashMap<String, String> {
         self.state_variables
             .iter()
             .map(|var| {
@@ -283,49 +287,37 @@ impl VMTModel {
             .collect()
     }
 
+    fn get_current_to_next_varible_names(&self) -> HashMap<String, String> {
+        self.state_variables
+            .iter()
+            .map(|var| {
+                (
+                    var.get_current_variable_name().clone(),
+                    var.get_next_variable_name().clone(),
+                )
+            })
+            .collect()
+    }
+
     pub fn add_instantiation(&mut self, inst: String) {
+        let instance_term = self.get_instance_term(inst);
+        let mut frame_getter = FrameNumGetter::new();
+        instance_term.clone().accept(&mut frame_getter).unwrap();
+        if frame_getter.frame_nums.len() > 2 {
+            println!("NEED TO INSTANTIATE WITH PROPHECY");
+            return;
+        }
         let mut instantiator = Instantiator {
             visitor: SyntaxBuilder,
-            current_variables: self.get_all_current_variable_names(),
-            next_variables: self.get_all_next_variable_names(),
+            current_to_next_variables: self.get_current_to_next_varible_names(),
+            frames: frame_getter.frame_nums,
         };
-        let inst_string = format!("(assert {})", inst);
-        println!("inst: {}", inst_string);
-        let inst_term = get_term_from_assert_command_string(inst_string.as_bytes());
-        println!("{}", inst_term);
-        let new_term = inst_term.clone().accept(&mut instantiator).unwrap();
-        println!("rewritten {}", new_term);
-        let (init_term, init_attr) = match self.initial_condition.clone() {
-            Term::Attributes { term, attributes } => (term, attributes),
-            _ => panic!("Initial Condition is not an Attributes"),
-        };
-        let (trans_term, trans_attr) = match self.transition_condition.clone() {
-            Term::Attributes { term, attributes } => (term, attributes),
-            _ => panic!("Transition Condition is not an Attriubtes"),
-        };
-
-        self.initial_condition = Term::Attributes {
-            term: Box::new(Term::Application {
-                qual_identifier: crate::concrete::QualIdentifier::Simple {
-                    identifier: Identifier::Simple {
-                        symbol: Symbol(format!("and")),
-                    },
-                },
-                arguments: vec![new_term.clone(), *init_term],
-            }),
-            attributes: init_attr,
-        };
-        self.transition_condition = Term::Attributes {
-            term: Box::new(Term::Application {
-                qual_identifier: crate::concrete::QualIdentifier::Simple {
-                    identifier: Identifier::Simple {
-                        symbol: Symbol(format!("and")),
-                    },
-                },
-                arguments: vec![new_term.clone(), *trans_term],
-            }),
-            attributes: trans_attr,
-        };
+        let rewritten_term = instance_term.clone().accept(&mut instantiator).unwrap();
+        println!("rewritten: {}", rewritten_term);
+        self.initial_condition =
+            self.add_instantiation_to_condition(rewritten_term.clone(), self.initial_condition.clone());
+        self.transition_condition =
+            self.add_instantiation_to_condition(rewritten_term, self.transition_condition.clone());
         println!("new init: {}", self.initial_condition);
         println!("new trans: {}", self.transition_condition);
     }
@@ -343,4 +335,34 @@ impl VMTModel {
     pub fn get_state_holding_vars(&self) -> Vec<Variable> {
         self.state_variables.clone()
     }
+
+    fn add_instantiation_to_condition(&self, instantiation: Term, condition: Term) -> Term {
+        let (term, attributes) = match condition {
+            Term::Attributes { term, attributes } => (term, attributes),
+            _ => panic!("Condition is not an Attributes: {}", condition),
+        };
+        let mut and_terms = get_and_terms(term);
+        and_terms.push(instantiation.clone());
+        Term::Attributes {
+            term: Box::new(Term::Application {
+                qual_identifier: crate::concrete::QualIdentifier::Simple {
+                    identifier: Identifier::Simple {
+                        symbol: Symbol(format!("and")),
+                    },
+                },
+                arguments: and_terms,
+            }),
+            attributes,
+        }
+    }
+
+    fn get_instance_term(&self, instance: String) -> Term {
+        let command = format!("(assert {})", instance);
+        println!("instance command: {}", command);
+        let inst_term = get_term_from_assert_command_string(command.as_bytes());
+        println!("{}", inst_term);
+        inst_term
+    }
+
+    
 }

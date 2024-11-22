@@ -7,6 +7,14 @@ pub struct Variable {
     pub relationship: Command,
 }
 
+/// This is just a convention that I've used, all fully uppercase 
+/// variable names are Immutable. You could scan the transition 
+/// relation and only tag variables as immutable if they only 
+/// ever have `(= var var_next)` but this is fine for now. 
+pub fn var_is_immutable(var_name: &str) -> bool {
+    var_name.chars().all(|char| char.is_uppercase())
+}
+
 impl Variable {
     pub fn get_current_variable_name(&self) -> &String {
         match &self.current {

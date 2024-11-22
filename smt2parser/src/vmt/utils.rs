@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::concrete::{Command, Term};
+use crate::concrete::{Command, Identifier, Term};
 
 use super::{action::Action, variable::Variable};
 
@@ -10,6 +10,39 @@ pub fn assert_term(term: &Term) -> String {
 
 pub fn assert_negation(term: &Term) -> String {
     format!("(assert (not {}))", term)
+}
+
+/// Only call this method if you're sure that the given Term is or should be
+/// an `and` Application. It will panic if not.
+pub fn get_and_terms(term: Box<Term>) -> Vec<Term> {
+    match *term.clone() {
+        Term::Application {
+            qual_identifier,
+            arguments,
+        } => match qual_identifier {
+            crate::concrete::QualIdentifier::Simple { identifier } => match identifier {
+                Identifier::Simple { symbol } => {
+                    if symbol.0 == "and" {
+                        arguments
+                    } else {
+                        panic!(
+                            "Inner term of condition is not `and` Application: {}",
+                            term
+                        )
+                    }
+                }
+                Identifier::Indexed {
+                    symbol: _,
+                    indices: _,
+                } => panic!("Inner term of condition is not `and` Application: {}", term),
+            },
+            crate::concrete::QualIdentifier::Sorted {
+                identifier: _,
+                sort: _,
+            } => todo!(),
+        },
+        _ => panic!("Inner term of condition is not Application: {}", term),
+    }
 }
 
 pub fn get_variables_and_actions(
