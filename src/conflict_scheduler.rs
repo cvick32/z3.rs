@@ -72,7 +72,7 @@ where
                         egg::ENodeOrVar::Var(var) => {
                             // TODO: handle all found substs
                             let eclass = &egraph[*subst.get(*var).unwrap()];
-                            find_best_variable_substitution::<L, N>(eclass)
+                            find_best_variable_substitution::<L, N>(egraph, eclass)
                         }
                     })
                     .collect::<Vec<_>>()
@@ -93,7 +93,7 @@ where
                             egg::ENodeOrVar::ENode(node) => node.clone(),
                             egg::ENodeOrVar::Var(var) => {
                                 let eclass = &egraph[*subst.get(*var).unwrap()];
-                                find_best_variable_substitution::<L, N>(eclass)
+                                find_best_variable_substitution::<L, N>(egraph, eclass)
                             }
                         })
                         .collect::<Vec<_>>()
@@ -128,16 +128,27 @@ where
 /// that has the highest score w.r.t some ranking function. I know there's some notion of
 /// ranking that's built into egg, so maybe we can pre-compute this inside the EClass itself
 /// and just return `max()` here.
-fn find_best_variable_substitution<L, N>(eclass: &egg::EClass<L, <N as Analysis<L>>::Data>) -> L
+fn find_best_variable_substitution<L, N>(
+    egraph: &egg::EGraph<L, N>,
+    eclass: &egg::EClass<L, <N as Analysis<L>>::Data>,
+) -> L
 where
-    L: egg::Language + std::fmt::Display,
+    L: egg::Language + std::fmt::Display, 
     N: egg::Analysis<L>,
 {
     for node in &eclass.nodes {
         if node.to_string().contains(VARIABLE_FRAME_DELIMITER) {
             // Always return a variable if one is available.
             return node.clone();
-        }
+        } else if node.children().len() > 0 {
+            println!("NODE: {}", node);
+            //let new_children = |id: Id| find_best_variable_substitution(egraph, &egraph[id]);
+            //let dd = node.build_recexpr(new_children);
+            //println!("{:?}", egraph.lookup_expr(&dd));
+            //println!("new term: {}", dd);
+            //preturn dd.;
+            
+        } 
     }
     // TODO: How to handle function calls? Can recursively call this function on the children of a Node,
     // but I'm not sure how to construct a new Node from that.
