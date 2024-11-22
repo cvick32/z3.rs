@@ -51,13 +51,11 @@ To run all of the benchmarks we currently have run:
 The filename doesn't matter. 
 
 
-# Things we need (in no particular order)
+# TODOs
 
-- computing interpolants
-- finding axiom violations from egg
-- ranking egg rewrites
+- [] computing interpolants
+- [] ranking violations that egg finds
   - always prefer read terms?
   - only apply rewrites that fall into a particular vocabulary
-- egraph from formula
-  - getting the rewrites it induces
-- rewrites from model + axiom instansitions 
+- [] remove let statements when VMTModel is built so that we don't have to call LetExtract so much
+- [] fix 2dim benchmark with arrays of arrays
