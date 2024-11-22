@@ -73,7 +73,7 @@ pub fn get_commands(content: BufReader<File>, filename: String) -> Vec<crate::co
     for result in command_stream {
         match result {
             Ok(command) => commands.push(command),
-            Err(_) => todo!(),
+            Err(err) => todo!("Command Error: {}", err),
         }
     }
     commands
