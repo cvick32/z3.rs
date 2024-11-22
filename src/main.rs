@@ -1,11 +1,6 @@
 use clap::Parser;
-use std::{
-    fs::File,
-    io::Write,
-};
+use std::{fs::File, io::Write};
 use yardbird::{benchmark::run_benchmarks, model_from_options, proof_loop, YardbirdOptions};
-
-
 
 fn main() {
     env_logger::init();
@@ -22,5 +17,4 @@ fn main() {
             let _ = output.write(abstract_vmt_model.as_vmt_string().as_bytes());
         }
     }
-   
 }

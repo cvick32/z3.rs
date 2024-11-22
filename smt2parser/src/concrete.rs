@@ -1136,7 +1136,7 @@ impl std::fmt::Display for Constant {
 
 impl std::fmt::Display for Symbol {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let c = self.0.as_bytes().get(0);
+        let c = self.0.as_bytes().first();
         if c.is_some()
             && lexer::is_non_digit_symbol_byte(*c.unwrap())
             && self.0.as_bytes().iter().all(|c| lexer::is_symbol_byte(*c))

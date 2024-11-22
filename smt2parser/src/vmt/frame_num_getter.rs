@@ -26,7 +26,7 @@ impl FrameNumGetter {
             frame_nums: BTreeSet::new(),
         }
     }
-    
+
     pub(crate) fn max_min_difference(&self) -> usize {
         if self.frame_nums.len() < 2 {
             0

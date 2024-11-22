@@ -351,7 +351,7 @@ impl VMTModel {
             term: Box::new(Term::Application {
                 qual_identifier: crate::concrete::QualIdentifier::Simple {
                     identifier: Identifier::Simple {
-                        symbol: Symbol(format!("and")),
+                        symbol: Symbol("and".to_string()),
                     },
                 },
                 arguments: and_terms,

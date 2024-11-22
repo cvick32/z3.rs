@@ -170,12 +170,12 @@ where
     }
 
     fn peek_byte(&mut self) -> Option<&u8> {
-        self.peek_bytes().get(0)
+        self.peek_bytes().first()
     }
 
     fn skip_whitespace(&mut self) -> bool {
         match self.peek_byte() {
-            Some(b) if matches!(b, b' ' | b'\n' | b'\t' | b'\r') => {
+            Some(b' ' | b'\n' | b'\t' | b'\r') => {
                 self.consume_byte();
                 true
             }
@@ -380,7 +380,7 @@ where
 }
 
 fn is_digit_byte(c: u8) -> bool {
-    matches!(c, b'0'..=b'9')
+    c.is_ascii_digit()
 }
 
 pub(crate) fn is_symbol_byte(c: u8) -> bool {

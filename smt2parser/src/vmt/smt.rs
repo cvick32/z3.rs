@@ -125,8 +125,8 @@ impl SMTProblem {
             .collect::<Vec<String>>()
             .join("\n");
         let property_assert = match &self.property_assertion {
-            Some(prop) => assert_negation(&prop),
-            None => format!(""),
+            Some(prop) => assert_negation(prop),
+            None => String::new(),
         };
         format!(
             "{}\n{}\n{}\n{}\n{}",

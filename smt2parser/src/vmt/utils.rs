@@ -150,17 +150,18 @@ pub fn get_transition_system_component(command: &Command, attribute: &str) -> Te
 
 pub fn command_has_attribute_string(command: &Command, attribute: &str) -> bool {
     match command {
-        Command::DefineFun { sig: _, term } => match term {
-            Term::Attributes {
-                term: _,
-                attributes,
-            } => {
-                assert!(attributes.len() == 1);
-                let keyword = &attributes[0].0 .0;
-                keyword == attribute
-            }
-            _ => false,
-        },
+        Command::DefineFun {
+            sig: _,
+            term:
+                Term::Attributes {
+                    term: _,
+                    attributes,
+                },
+        } => {
+            assert!(attributes.len() == 1);
+            let keyword = &attributes[0].0 .0;
+            keyword == attribute
+        }
         _ => false,
     }
 }

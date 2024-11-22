@@ -28,16 +28,18 @@ impl crate::rewriter::Rewriter for Instantiator {
         } else {
             let (variable_name, time_str) = (symbol_split[0], symbol_split[1]);
             if var_is_immutable(variable_name) {
-                return Ok(Symbol(format!("{}", variable_name)));
+                return Ok(Symbol(variable_name.to_string()));
             }
             let time: usize = time_str.parse().unwrap();
             if &time == self.frames.first().unwrap() {
-                Ok(Symbol(format!("{}", variable_name)))
+                Ok(Symbol(variable_name.to_string()))
             } else if &time == self.frames.last().unwrap() {
-                Ok(Symbol(format!(
-                    "{}",
-                    self.current_to_next_variables.get(variable_name).unwrap()
-                )))
+                Ok(Symbol(
+                    self.current_to_next_variables
+                        .get(variable_name)
+                        .unwrap()
+                        .to_string(),
+                ))
             } else {
                 todo!("Haven't implemented prophecy instantiation!")
             }

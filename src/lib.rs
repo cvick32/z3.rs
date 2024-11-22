@@ -31,18 +31,19 @@ pub struct YardbirdOptions {
     #[arg(short, long, default_value_t = false)]
     pub print_vmt: bool,
 
-    // Run all of the benchmarks. 
+    // Run all of the benchmarks.
     #[arg(short, long, default_value_t = false)]
     pub run_benchmarks: bool,
 }
 
-/// The main verification loop. 
+/// The main verification loop.
 pub fn proof_loop(bmc_depth: &u8, vmt_model: &mut VMTModel, used_instances: &mut Vec<String>) {
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
     for depth in 0..*bmc_depth {
         println!("STARTING BMC FOR DEPTH {}", depth);
-        for _ in 0..10 { // Run max of 10 iterations for depth
+        for _ in 0..10 {
+            // Run max of 10 iterations for depth
             // Currently run once, this will eventually run until UNSAT
             let smt = vmt_model.unroll(depth);
             let solver = Solver::new(&context);

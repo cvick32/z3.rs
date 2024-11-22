@@ -6,21 +6,21 @@ use crate::array_axioms::ArrayLanguage;
 pub struct SaturationInequalities {}
 impl Analysis<ArrayLanguage> for SaturationInequalities {
     type Data = bool;
-    fn make(egraph: &EGraph<ArrayLanguage, Self>, enode: &ArrayLanguage) -> Self::Data {
+    fn make(_egraph: &EGraph<ArrayLanguage, Self>, _enode: &ArrayLanguage) -> Self::Data {
         false
     }
-    fn merge(&mut self, a: &mut Self::Data, b: Self::Data) -> DidMerge {
+    fn merge(&mut self, a: &mut Self::Data, _b: Self::Data) -> DidMerge {
         *a = true;
         DidMerge(false, true)
     }
 
     fn pre_union(
-        egraph: &EGraph<ArrayLanguage, Self>,
-        id1: Id,
-        id2: Id,
-        justification: &Option<Justification>,
+        _egraph: &EGraph<ArrayLanguage, Self>,
+        _id1: Id,
+        _id2: Id,
+        _justification: &Option<Justification>,
     ) {
     }
 
-    fn modify(egraph: &mut EGraph<ArrayLanguage, Self>, id: Id) {}
+    fn modify(_egraph: &mut EGraph<ArrayLanguage, Self>, _id: Id) {}
 }

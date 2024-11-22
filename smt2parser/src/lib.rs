@@ -62,7 +62,7 @@ use vmt::{VMTError, VMTModel};
 
 pub fn get_vmt_from_path(input: &PathBuf) -> Result<VMTModel, VMTError> {
     let filename = String::from(input.to_str().unwrap());
-    let content = std::io::BufReader::new(std::fs::File::open(&input).unwrap());
+    let content = std::io::BufReader::new(std::fs::File::open(input).unwrap());
     let commands = get_commands(content, filename);
     VMTModel::checked_from(commands)
 }

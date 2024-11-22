@@ -1,5 +1,9 @@
 use std::{
-    fs::{read_dir, File}, io::Write, sync::mpsc::{self, RecvTimeoutError}, thread, time::Duration
+    fs::{read_dir, File},
+    io::Write,
+    sync::mpsc::{self, RecvTimeoutError},
+    thread,
+    time::Duration,
 };
 
 use serde::Serialize;
@@ -21,10 +25,7 @@ where
     let (tx, rx) = mpsc::channel();
     let _ = thread::spawn(move || {
         let result = f();
-        match tx.send(result) {
-            Ok(()) => {} // everything good
-            Err(_) => {} // we have been released, don't panic
-        }
+        if let Ok(()) = tx.send(result) {}
     });
 
     match rx.recv_timeout(timeout) {
@@ -59,7 +60,11 @@ pub fn run_benchmarks(options: &YardbirdOptions) {
         let mut used_instances = vec![];
         let result = run_with_timeout(
             move || {
-                proof_loop(&new_options.depth, &mut abstract_vmt_model, &mut used_instances);
+                proof_loop(
+                    &new_options.depth,
+                    &mut abstract_vmt_model,
+                    &mut used_instances,
+                );
             },
             Duration::from_secs(10),
         );
