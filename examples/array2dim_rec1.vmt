@@ -1,6 +1,6 @@
-(declare-fun a () (Array Int Int)Of(Array Int Int))
-(declare-fun a_next () (Array Int Int)Of(Array Int Int))
-(define-fun .a () (Array Int Int)Of(Array Int Int) (! a :next a_next))
+(declare-fun a () (Array Int (Array Int Int)))
+(declare-fun a_next () (Array Int (Array Int Int)))
+(define-fun .a () (Array Int (Array Int Int)) (! a :next a_next))
 (declare-fun i () Int)
 (declare-fun i_next () Int)
 (define-fun .i () Int (! i :next i_next))
@@ -32,9 +32,9 @@
 (define-fun trans-conditions () Bool (!
  (and
 (=> (and (< i M) (= pc 1)) (= a a_next))
-(let ((a!1 (= ((Array Int Int)store a i (store ((Array Int Int)select a i) j 0)) a_next)))
+(let ((a!1 (= (store a i (store (select a i) j 0)) a_next)))
   (=> (and (= j 0) (< j N) (= pc 2)) a!1))
-(let ((a!1 ((Array Int Int)store a i (store ((Array Int Int)select a i) j (select ((Array Int Int)select a i) (- j 1))))))
+(let ((a!1 (store a i (store (select a i) j (select (select a i) (- j 1))))))
   (=> (and (not (= j 0)) (< j N) (= pc 2)) (= a!1 a_next)))
 (=> (and (not (< j N)) (= pc 2)) (= a a_next))
 (let ((a!1 (and (= pc 2) (not (not (< j N))))))
@@ -67,7 +67,7 @@
 
 (define-fun property () Bool (!
  (and
-(let ((a!1 (not (= (select ((Array Int Int)select a Z) Z) 0))))
+(let ((a!1 (not (= (select (select a Z) Z) 0))))
   (=> (and (= pc 1) (not (< i M)) (>= Z 0) (< Z M) (>= Z 0) (< Z N))
       (and (not a!1))))
 ) :invar-property 0))
