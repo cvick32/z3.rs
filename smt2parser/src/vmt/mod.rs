@@ -161,11 +161,7 @@ impl VMTModel {
             step: 0,
         };
         let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
-        smt_problem.add_variable_definitions(
-            &self.state_variables,
-            &self.actions,
-            builder.clone(),
-        );
+        smt_problem.add_variable_definitions(&self.state_variables, &self.actions, builder.clone());
         smt_problem.add_assertion(&self.initial_condition, builder.clone());
         smt_problem
     }
@@ -333,18 +329,17 @@ impl VMTModel {
         println!("new init: {}", self.initial_condition);
         println!("new trans: {}", self.transition_condition);
     }
-    
+
     pub fn get_parametric_sort_names(&self) -> Vec<String> {
-        self.sorts.iter().map(|sort| {
-            match sort {
-                Command::DeclareSort { symbol, arity: _ } => {
-                    symbol.0.clone()
-                },
+        self.sorts
+            .iter()
+            .map(|sort| match sort {
+                Command::DeclareSort { symbol, arity: _ } => symbol.0.clone(),
                 _ => panic!("Sort in VMTModel is not of type DefineSort!: {}", sort),
-            }
-        }).collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
     }
-    
+
     pub fn get_state_holding_vars(&self) -> Vec<Variable> {
         self.state_variables.clone()
     }
