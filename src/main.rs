@@ -1,6 +1,7 @@
 use analysis::SaturationInequalities;
 use array_axioms::{ArrayLanguage, Saturate};
 use clap::Parser;
+use log::debug;
 use smt2parser::{get_commands, vmt::VMTModel};
 use z3::{Config, Context, Solver};
 
@@ -30,6 +31,7 @@ fn main() {
     let mut abstract_vmt_model = concrete_vmt_model.abstract_array_theory();
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
+    let mut used_instances = vec![];
 
     for depth in 0..10 {
         println!("STARTING BMC FOR DEPTH {}", depth);
@@ -96,7 +98,8 @@ fn main() {
                     //egraph.dot().to_pdf("saturated.pdf").unwrap();
                     //println!("{:?}", egraph.dump());
                     for inst in instantiations {
-                        abstract_vmt_model.add_instantiation(inst);
+                        // Adds the used instances. 
+                        abstract_vmt_model.add_instantiation(inst, &mut used_instances);
                     }
                 }
             }

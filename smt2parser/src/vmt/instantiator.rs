@@ -21,7 +21,6 @@ impl crate::rewriter::Rewriter for Instantiator {
     }
 
     fn process_symbol(&mut self, s: Symbol) -> Result<Symbol, Self::Error> {
-        println!("sym: {}", s);
         let symbol_split = s.0.split(VARIABLE_FRAME_DELIMITER).collect::<Vec<_>>();
         if symbol_split.len() == 1 {
             // Symbol is not a variable

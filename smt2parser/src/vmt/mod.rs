@@ -299,7 +299,7 @@ impl VMTModel {
             .collect()
     }
 
-    pub fn add_instantiation(&mut self, inst: String) {
+    pub fn add_instantiation(&mut self, inst: String, instances: &mut Vec<String>) {
         let instance_term = self.get_instance_term(inst);
         let mut frame_getter = FrameNumGetter::new();
         instance_term.clone().accept(&mut frame_getter).unwrap();
@@ -313,13 +313,17 @@ impl VMTModel {
             frames: frame_getter.frame_nums,
         };
         let rewritten_term = instance_term.clone().accept(&mut instantiator).unwrap();
+        if instances.contains(&rewritten_term.to_string()) {
+            println!("ALREADY SEEN {} in {:?}", rewritten_term, instances);
+            return;
+        } else {
+            instances.push(rewritten_term.to_string());
+        }
         println!("rewritten: {}", rewritten_term);
         self.initial_condition = self
             .add_instantiation_to_condition(rewritten_term.clone(), self.initial_condition.clone());
         self.transition_condition =
             self.add_instantiation_to_condition(rewritten_term, self.transition_condition.clone());
-        println!("new init: {}", self.initial_condition);
-        println!("new trans: {}", self.transition_condition);
     }
 
     pub fn get_parametric_sort_names(&self) -> Vec<String> {
@@ -358,9 +362,7 @@ impl VMTModel {
 
     fn get_instance_term(&self, instance: String) -> Term {
         let command = format!("(assert {})", instance);
-        println!("instance command: {}", command);
         let inst_term = get_term_from_assert_command_string(command.as_bytes());
-        println!("{}", inst_term);
         inst_term
     }
 }
