@@ -11,7 +11,7 @@ pub struct LetExtract {
     pub scope: HashMap<Symbol, Term>,
 }
 impl LetExtract {
-    fn substitute_scoped_symbols(&self, term: Term) -> Term {
+    fn substitute_scoped_symbols(&mut self, term: Term) -> Term {
         match term {
             Term::Constant(constant) => Term::Constant(constant),
             Term::QualIdentifier(q_id) => {
@@ -85,9 +85,12 @@ impl LetExtract {
                 }
             }
             Term::Let {
-                var_bindings: _,
-                term: _,
-            } => panic!("SHOULD NEVER CALL THIS WITH LET!"),
+                var_bindings,
+                term,
+            } => {
+                let let_term = Term::Let { var_bindings, term };
+                let_term.accept_term_visitor(self).unwrap()
+            }
         }
     }
 }
@@ -272,4 +275,7 @@ mod test {
     );
     create_let_test!(test_actual_usage, b"(assert (and (let ((a!1 (not (not (= (Read-Int-Int c@1 Z@1) 99))))) (=> (and (>= i@1 N@1) (>= Z@1 100) (< Z@1 N@1)) (and a!1)))))", "(and (=> (and (>= i@1 N@1) (>= Z@1 100) (< Z@1 N@1)) (and (not (not (= (Read-Int-Int c@1 Z@1) 99))))))");
     create_let_test!(test_transition_use, b"(assert (and (let ((a!1 (= (Write-Int-Int c@0 i@0 (+ i@0 (Read-Int-Int a@0 i@0))) c@1)) (a!2 (= (Write-Int-Int c@0 i@0 (Read-Int-Int c@0 (- i@0 1))) c@1))) (and (=> (< i@0 100) a!1) (=> (not (< i@0 100)) a!2))) (< i@0 N@0) (= (+ i@0 1) i@1) (= a@0 a@1) (= N@0 N@1) (= Z@0 Z@1)))", "(and (and (=> (< i@0 100) (= (Write-Int-Int c@0 i@0 (+ i@0 (Read-Int-Int a@0 i@0))) c@1)) (=> (not (< i@0 100)) (= (Write-Int-Int c@0 i@0 (Read-Int-Int c@0 (- i@0 1))) c@1))) (< i@0 N@0) (= (+ i@0 1) i@1) (= a@0 a@1) (= N@0 N@1) (= Z@0 Z@1))");
+    create_let_test!(test_double, b"(assert (let ((a!1 (and (not (and (< i N) (>= j 0))))) (a!2 (and (not (not (>= m n)))))) (=> a!1 a!2)))", "(=> (and (not (and (< i N) (>= j 0)))) (and (not (not (>= m n)))))");
+    create_let_test!(test_nested, b"(assert (let ((a!1 2)) (let ((a!2 3)) (+ a!1 a!2))))", "(+ 2 3)");
 }
+    
