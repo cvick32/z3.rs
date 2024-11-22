@@ -1,16 +1,18 @@
 use std::collections::BTreeSet;
 
-use crate::{concrete::{Symbol, SyntaxBuilder}, vmt::{variable::var_is_immutable, VARIABLE_FRAME_DELIMITER}};
-
+use crate::{
+    concrete::{Symbol, SyntaxBuilder},
+    vmt::{variable::var_is_immutable, VARIABLE_FRAME_DELIMITER},
+};
 
 /// This visits a Term and finds all of the frame numbers associated
-/// with each variable in the Term. 
+/// with each variable in the Term.
 /// For the Term (= a@0 a@1), we would expect FrameNumGetter.frame_nums to be {0, 1}.
 /// We need this information in the Instantiator to when to plug in current variable
-/// values or next variable values. 
-/// 
+/// values or next variable values.
+///
 /// TODO: Using the Rewriter may not be the best choice here because it rebuilds the term.
-/// But, using the TermVisitor like in LetExtract is more cumbersome. 
+/// But, using the TermVisitor like in LetExtract is more cumbersome.
 #[derive(Clone, Default)]
 pub struct FrameNumGetter {
     pub visitor: SyntaxBuilder,
@@ -43,7 +45,7 @@ impl crate::rewriter::Rewriter for FrameNumGetter {
             let (var_name, time_str) = (symbol_split[0], symbol_split[1]);
             if var_is_immutable(var_name) {
                 // Don't add time step to frame_nums because immutable variables always
-                // have the same value. 
+                // have the same value.
                 Ok(s)
             } else {
                 let time = time_str.parse().unwrap();
@@ -53,5 +55,3 @@ impl crate::rewriter::Rewriter for FrameNumGetter {
         }
     }
 }
-
-

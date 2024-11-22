@@ -25,10 +25,7 @@ pub fn get_and_terms(term: Box<Term>) -> Vec<Term> {
                     if symbol.0 == "and" {
                         arguments
                     } else {
-                        panic!(
-                            "Inner term of condition is not `and` Application: {}",
-                            term
-                        )
+                        panic!("Inner term of condition is not `and` Application: {}", term)
                     }
                 }
                 Identifier::Indexed {

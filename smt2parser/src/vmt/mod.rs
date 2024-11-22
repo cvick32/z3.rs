@@ -314,8 +314,8 @@ impl VMTModel {
         };
         let rewritten_term = instance_term.clone().accept(&mut instantiator).unwrap();
         println!("rewritten: {}", rewritten_term);
-        self.initial_condition =
-            self.add_instantiation_to_condition(rewritten_term.clone(), self.initial_condition.clone());
+        self.initial_condition = self
+            .add_instantiation_to_condition(rewritten_term.clone(), self.initial_condition.clone());
         self.transition_condition =
             self.add_instantiation_to_condition(rewritten_term, self.transition_condition.clone());
         println!("new init: {}", self.initial_condition);
@@ -363,6 +363,4 @@ impl VMTModel {
         println!("{}", inst_term);
         inst_term
     }
-
-    
 }
