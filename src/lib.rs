@@ -9,9 +9,10 @@ use z3::{Config, Context, Solver};
 
 pub mod analysis;
 pub mod array_axioms;
+pub mod benchmark;
 pub mod conflict_scheduler;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
 pub struct YardbirdOptions {
     /// Name of the VMT file.
@@ -29,15 +30,19 @@ pub struct YardbirdOptions {
     // Output VMT files before and after instantiation.
     #[arg(short, long, default_value_t = false)]
     pub print_vmt: bool,
+
+    // Run all of the benchmarks. 
+    #[arg(short, long, default_value_t = false)]
+    pub run_benchmarks: bool,
 }
 
 /// The main verification loop. 
-pub fn proof_loop(bmc_depth: u8, vmt_model: &mut VMTModel, used_instances: &mut Vec<String>) {
+pub fn proof_loop(bmc_depth: &u8, vmt_model: &mut VMTModel, used_instances: &mut Vec<String>) {
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
-    for depth in 0..bmc_depth {
+    for depth in 0..*bmc_depth {
         println!("STARTING BMC FOR DEPTH {}", depth);
-        loop {
+        for _ in 0..10 { // Run max of 10 iterations for depth
             // Currently run once, this will eventually run until UNSAT
             let smt = vmt_model.unroll(depth);
             let solver = Solver::new(&context);
@@ -107,6 +112,7 @@ pub fn proof_loop(bmc_depth: u8, vmt_model: &mut VMTModel, used_instances: &mut 
             }
         }
     }
+    println!("USED INSTANCES: {:#?}", used_instances);
 }
 
 pub fn model_from_options(options: &YardbirdOptions) -> VMTModel {

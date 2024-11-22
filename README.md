@@ -45,6 +45,10 @@ for node in &eclass.nodes {
 }
 ```
 
+# Running all Benchmarks 
+To run all of the benchmarks we currently have run:  
+`cargo run -- --filename blah  --run-all > all.txt `
+The filename doesn't matter. 
 
 
 # Things we need (in no particular order)

@@ -10,10 +10,11 @@ macro_rules! create_integration_test {
                 depth: 10,
                 bmc_count: 2,
                 print_vmt: false,
+                run_benchmarks: false,
             };
             let mut vmt = model_from_options(&options);
             let mut used: Vec<String> = vec![];
-            proof_loop(options.depth, &mut vmt, &mut used);
+            proof_loop(&options.depth, &mut vmt, &mut used);
             assert!(used.len() == $num_instances, "{} != {}", used.len(), $num_instances);
         }
     };
