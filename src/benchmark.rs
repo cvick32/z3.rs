@@ -19,7 +19,7 @@ enum BenchResult {
 
 fn run_with_timeout<F, T>(f: F, timeout: Duration) -> BenchResult
 where
-    F: FnOnce() -> T + Send + 'static,
+    F: FnOnce() -> Option<T> + Send + 'static,
     T: Send + 'static,
 {
     let (tx, rx) = mpsc::channel();
@@ -40,10 +40,11 @@ struct BenchmarkResult {
     example_name: String,
     result: BenchResult,
 }
-pub fn run_benchmarks(options: &YardbirdOptions) {
+
+pub fn run_benchmarks(options: &YardbirdOptions) -> anyhow::Result<()> {
     let mut bench_results = vec![];
-    for path in read_dir("./examples/").unwrap() {
-        let path_string: String = path.unwrap().path().to_str().unwrap().to_string();
+    for path in read_dir("./examples/")? {
+        let path_string: String = path?.path().to_string_lossy().to_string();
         if path_string.contains("2dim") {
             println!("Skipping: {}", path_string);
             continue;
@@ -64,7 +65,8 @@ pub fn run_benchmarks(options: &YardbirdOptions) {
                     &new_options.depth,
                     &mut abstract_vmt_model,
                     &mut used_instances,
-                );
+                )
+                .ok()
             },
             Duration::from_secs(10),
         );
@@ -74,7 +76,8 @@ pub fn run_benchmarks(options: &YardbirdOptions) {
         });
     }
     println!("{:?}", bench_results);
-    let mut output = File::create("benchmark-results.json").unwrap();
-    let _ = output.write(serde_json::to_string(&bench_results).unwrap().as_bytes());
+    let mut output = File::create("benchmark-results.json")?;
+    let _ = output.write(serde_json::to_string(&bench_results)?.as_bytes());
     println!("Tried {} benchmarks.", bench_results.len());
+    Ok(())
 }

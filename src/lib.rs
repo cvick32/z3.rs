@@ -1,6 +1,7 @@
 use std::{fs::File, io::Write};
 
 use crate::analysis::SaturationInequalities;
+use anyhow::anyhow;
 use array_axioms::{ArrayLanguage, Saturate};
 use clap::Parser;
 use log::debug;
@@ -37,7 +38,11 @@ pub struct YardbirdOptions {
 }
 
 /// The main verification loop.
-pub fn proof_loop(bmc_depth: &u8, vmt_model: &mut VMTModel, used_instances: &mut Vec<String>) {
+pub fn proof_loop(
+    bmc_depth: &u8,
+    vmt_model: &mut VMTModel,
+    used_instances: &mut Vec<String>,
+) -> anyhow::Result<()> {
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
     for depth in 0..*bmc_depth {
@@ -49,10 +54,11 @@ pub fn proof_loop(bmc_depth: &u8, vmt_model: &mut VMTModel, used_instances: &mut
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
             debug!("{}", solver);
+            // TODO: abstract this out somehow
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
-                egg::EGraph::new(SaturationInequalities {}).with_explanations_enabled();
+                egg::EGraph::new(SaturationInequalities).with_explanations_enabled();
             for term in smt.get_assert_terms() {
-                egraph.add_expr(&term.parse().unwrap());
+                egraph.add_expr(&term.parse()?);
             }
             match solver.check() {
                 z3::SatResult::Unsat => {
@@ -66,22 +72,25 @@ pub fn proof_loop(bmc_depth: &u8, vmt_model: &mut VMTModel, used_instances: &mut
                 }
                 z3::SatResult::Sat => {
                     // find Array theory fact that rules out counterexample
-                    let model = solver.get_model().unwrap();
+                    let model = solver.get_model().ok_or(anyhow!("No z3 model"))?;
                     debug!("{}", model);
 
                     for func_decl in model.iter() {
                         if func_decl.arity() == 0 {
                             // VARIABLE
-                            let func_decl_ast = func_decl.apply(&[]); // Apply no arguments to the constant so we can call get_const_interp.
-                            let var_id = egraph.add_expr(&func_decl.name().parse().unwrap());
+                            // Apply no arguments to the constant so we can call get_const_interp.
+                            let func_decl_ast = func_decl.apply(&[]);
+                            let var_id = egraph.add_expr(&func_decl.name().parse()?);
                             let value = model
                                 .get_const_interp(&func_decl_ast)
                                 .expect("Model failure.");
-                            let value_id = egraph.add_expr(&value.to_string().parse().unwrap());
+                            let value_id = egraph.add_expr(&value.to_string().parse()?);
                             egraph.union(var_id, value_id);
                         } else {
                             // FUNCTION DEF
-                            let interpretation = model.get_func_interp(&func_decl).unwrap();
+                            let interpretation = model
+                                .get_func_interp(&func_decl)
+                                .ok_or(anyhow!("No func interp"))?;
                             for entry in interpretation.get_entries() {
                                 let function_call = format!(
                                     "({} {})",
@@ -93,18 +102,15 @@ pub fn proof_loop(bmc_depth: &u8, vmt_model: &mut VMTModel, used_instances: &mut
                                         .collect::<Vec<_>>()
                                         .join(" ")
                                 );
-                                let function_id = egraph.add_expr(&function_call.parse().unwrap());
-                                let value_id = egraph
-                                    .add_expr(&entry.get_value().to_string().parse().unwrap());
+                                let function_id = egraph.add_expr(&function_call.parse()?);
+                                let value_id =
+                                    egraph.add_expr(&entry.get_value().to_string().parse()?);
                                 egraph.union(function_id, value_id);
                             }
                         }
                     }
                     egraph.rebuild();
-                    //egraph.dot().to_pdf("unsaturated.pdf").unwrap();
                     let instantiations = egraph.saturate();
-                    //egraph.dot().to_pdf("saturated.pdf").unwrap();
-                    //println!("{:?}", egraph.dump());
                     for inst in instantiations {
                         // Adds the used instances.
                         vmt_model.add_instantiation(inst, used_instances);
@@ -114,6 +120,7 @@ pub fn proof_loop(bmc_depth: &u8, vmt_model: &mut VMTModel, used_instances: &mut
         }
     }
     println!("USED INSTANCES: {:#?}", used_instances);
+    Ok(())
 }
 
 pub fn model_from_options(options: &YardbirdOptions) -> VMTModel {
