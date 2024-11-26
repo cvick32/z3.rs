@@ -3,7 +3,8 @@ use egg::{Analysis, DidMerge, EGraph, Id, Justification};
 use crate::array_axioms::ArrayLanguage;
 
 #[derive(Default)]
-pub struct SaturationInequalities {}
+pub struct SaturationInequalities;
+
 impl Analysis<ArrayLanguage> for SaturationInequalities {
     type Data = bool;
     fn make(_egraph: &EGraph<ArrayLanguage, Self>, _enode: &ArrayLanguage) -> Self::Data {
