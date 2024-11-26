@@ -53,9 +53,11 @@ The filename doesn't matter.
 
 # TODOs
 
-- [] computing interpolants
-- [] ranking violations that egg finds
+- [ ] computing interpolants
+- [ ] ranking violations that egg finds
   - always prefer read terms?
   - only apply rewrites that fall into a particular vocabulary
-- [] remove let statements when VMTModel is built so that we don't have to call LetExtract so much
-- [] fix 2dim benchmark with arrays of arrays
+- [ ] remove let statements when VMTModel is built so that we don't have to call LetExtract so much
+- [ ] fix 2dim benchmark with arrays of arrays
+- [ ] move benchmarks to using `cargo bench`
+- [ ] proper error handling
