@@ -2,8 +2,9 @@ use std::{fs::File, io::Write};
 
 use crate::analysis::SaturationInequalities;
 use anyhow::anyhow;
-use array_axioms::{ArrayLanguage, Saturate};
+use array_axioms::ArrayLanguage;
 use clap::Parser;
+use egg_utils::Saturate;
 use log::debug;
 use smt2parser::{get_commands, vmt::VMTModel};
 use z3::{Config, Context, Solver};
@@ -12,6 +13,8 @@ pub mod analysis;
 pub mod array_axioms;
 pub mod benchmark;
 pub mod conflict_scheduler;
+mod cost;
+mod egg_utils;
 
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
@@ -111,9 +114,15 @@ pub fn proof_loop(
                     }
                     egraph.rebuild();
                     let instantiations = egraph.saturate();
-                    for inst in instantiations {
-                        // Adds the used instances.
-                        vmt_model.add_instantiation(inst, used_instances);
+
+                    // add all instantiations to the model,
+                    // if we have already seen all instantiations, break
+                    // TODO: not sure if this is correct...
+                    let no_progress = instantiations
+                        .into_iter()
+                        .all(|inst| !vmt_model.add_instantiation(inst, used_instances));
+                    if no_progress {
+                        break;
                     }
                 }
             }

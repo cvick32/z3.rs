@@ -2,7 +2,11 @@ use std::rc::Rc;
 
 use egg::*;
 
-use crate::conflict_scheduler::ConflictScheduler;
+use crate::{
+    conflict_scheduler::ConflictScheduler,
+    cost::BestVariableSubstitution,
+    egg_utils::{DefaultCostFunction, Saturate},
+};
 
 define_language! {
     pub enum ArrayLanguage {
@@ -26,12 +30,6 @@ define_language! {
     }
 }
 
-/// Trait for saturating an egraph with the array axioms. This hides the details of
-/// needing to create a runner every time you want to saturate a set of rules on an egraph.
-pub trait Saturate {
-    fn saturate(&mut self) -> Vec<String>;
-}
-
 impl<N> Saturate for EGraph<ArrayLanguage, N>
 where
     N: Analysis<ArrayLanguage> + Default + 'static,
@@ -47,6 +45,12 @@ where
         *self = std::mem::take(&mut runner.egraph);
         drop(runner);
         Rc::into_inner(instantiations).unwrap().into_inner()
+    }
+}
+
+impl DefaultCostFunction for ArrayLanguage {
+    fn cost_function() -> impl egg::CostFunction<ArrayLanguage> {
+        BestVariableSubstitution
     }
 }
 
