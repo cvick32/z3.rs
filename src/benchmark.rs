@@ -6,6 +6,7 @@ use std::{
     time::Duration,
 };
 
+use log::info;
 use serde::Serialize;
 
 use crate::{model_from_options, proof_loop, YardbirdOptions};
@@ -46,10 +47,10 @@ pub fn run_benchmarks(options: &YardbirdOptions) -> anyhow::Result<()> {
     for path in read_dir("./examples/")? {
         let path_string: String = path?.path().to_string_lossy().to_string();
         if path_string.contains("2dim") {
-            println!("Skipping: {}", path_string);
+            info!("Skipping: {}", path_string);
             continue;
         }
-        println!("Trying: {}", path_string);
+        info!("Trying: {}", path_string);
         let new_options = YardbirdOptions {
             filename: path_string.clone(),
             depth: options.depth,
@@ -75,9 +76,9 @@ pub fn run_benchmarks(options: &YardbirdOptions) -> anyhow::Result<()> {
             result,
         });
     }
-    println!("{:?}", bench_results);
+    info!("{:?}", bench_results);
     let mut output = File::create("benchmark-results.json")?;
     let _ = output.write(serde_json::to_string(&bench_results)?.as_bytes());
-    println!("Tried {} benchmarks.", bench_results.len());
+    info!("Tried {} benchmarks.", bench_results.len());
     Ok(())
 }

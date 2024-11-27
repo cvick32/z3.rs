@@ -55,8 +55,8 @@ where
         rewrite: &egg::Rewrite<L, N>,
         matches: Vec<egg::SearchMatches<L>>,
     ) -> usize {
-        println!("======>");
-        println!("applying {}", rewrite.name);
+        debug!("======>");
+        debug!("applying {}", rewrite.name);
         for m in &matches {
             if let Some(cow_ast) = &m.ast {
                 let subst = &m.substs[0];
@@ -78,9 +78,9 @@ where
                     // e-graph. This is a conflict, so we record the rule instantiation
                     // here.
                     if Some(m.eclass) != rhs_eclass {
-                        println!("FOUND VIOLATION");
+                        debug!("FOUND VIOLATION");
                         debug!("{applier_ast:#?}");
-                        println!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
+                        debug!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
                         self.instantiations
                             .borrow_mut()
                             .push(format!("(= {} {})", new_lhs, new_rhs));
@@ -91,7 +91,7 @@ where
         // let n = self
         //     .inner
         //     .apply_rewrite(iteration, egraph, rewrite, matches);
-        println!("<======");
+        debug!("<======");
         // we don't actually want to apply the rewrite, because it would be a violation
         0
     }
@@ -144,7 +144,7 @@ where
 fn unpatternify<L: egg::Language + std::fmt::Display>(
     pattern: egg::PatternAst<L>,
 ) -> egg::RecExpr<L> {
-    println!("pat: {}", pattern.pretty(80));
+    debug!("pat: {}", pattern.pretty(80));
     pattern
         .as_ref()
         .iter()
@@ -170,7 +170,7 @@ where
 {
     let extractor = egg::Extractor::new(egraph, L::cost_function());
     let (cost, expr) = extractor.find_best(eclass.id);
-    println!(
+    debug!(
         "    extraction: {} -> {} (cost: {cost:?})",
         eclass.id,
         expr.pretty(80)
@@ -182,23 +182,4 @@ where
         .map(egg::ENodeOrVar::ENode)
         .collect::<Vec<_>>()
         .into()
-    // println!("eclass id: {}", eclass.id);
-    // for node in &eclass.nodes {
-    //     println!("  here: {node:?}");
-    //     if node.to_string().contains(VARIABLE_FRAME_DELIMITER) {
-    //         // Always return a variable if one is available.
-    //         return node.clone();
-    //     } else if !node.children().is_empty() {
-    //         println!("NODE: {node}");
-    //         //let new_children = |id: Id| find_best_variable_substitution(egraph, &egraph[id]);
-    //         //let dd = node.build_recexpr(new_children);
-    //         //println!("{:?}", egraph.lookup_expr(&dd));
-    //         //println!("new term: {}", dd);
-    //         //preturn dd.;
-    //     }
-    // }
-    // // TODO: How to handle function calls? Can recursively call this function on the children of a Node,
-    // // but I'm not sure how to construct a new Node from that.
-    // println!("COULDN'T FIND A VARIABLE IN ECLASS: {:?}", eclass.nodes);
-    // eclass.nodes[0].clone()
 }

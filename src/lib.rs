@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use array_axioms::ArrayLanguage;
 use clap::Parser;
 use egg_utils::Saturate;
-use log::debug;
+use log::{debug, info};
 use smt2parser::{get_commands, vmt::VMTModel};
 use z3::{Config, Context, Solver};
 
@@ -49,7 +49,7 @@ pub fn proof_loop(
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
     for depth in 0..*bmc_depth {
-        println!("STARTING BMC FOR DEPTH {}", depth);
+        info!("STARTING BMC FOR DEPTH {}", depth);
         for _ in 0..10 {
             // Run max of 10 iterations for depth
             // Currently run once, this will eventually run until UNSAT
@@ -65,7 +65,7 @@ pub fn proof_loop(
             }
             match solver.check() {
                 z3::SatResult::Unsat => {
-                    println!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
+                    info!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
                     break;
                 }
                 z3::SatResult::Unknown => {
@@ -128,7 +128,7 @@ pub fn proof_loop(
             }
         }
     }
-    println!("USED INSTANCES: {:#?}", used_instances);
+    info!("USED INSTANCES: {:#?}", used_instances);
     Ok(())
 }
 

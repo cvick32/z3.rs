@@ -828,8 +828,10 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 name = "smt2parser"
 version = "0.6.1"
 dependencies = [
+ "env_logger 0.11.5",
  "fst",
  "itertools",
+ "log",
  "num",
  "permutation_iterator",
  "pomelo",
