@@ -1,3 +1,5 @@
+mod snapshot_tests;
+
 use yardbird::{self, model_from_options, proof_loop, YardbirdOptions};
 
 macro_rules! create_integration_test {
@@ -13,7 +15,7 @@ macro_rules! create_integration_test {
             };
             let mut vmt = model_from_options(&options);
             let mut used: Vec<String> = vec![];
-            proof_loop(&options.depth, &mut vmt, &mut used);
+            proof_loop(&options.depth, &mut vmt, &mut used).unwrap();
             assert!(
                 used.len() == $num_instances,
                 "{} != {}",

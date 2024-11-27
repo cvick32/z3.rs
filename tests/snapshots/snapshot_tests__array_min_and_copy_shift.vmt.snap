@@ -1,0 +1,20 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_min_and_copy_shift.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int b Z Z) Z) Z)",
+        "(= (Read-Int-Int (Write-Int-Int b Z Z) Z) (Read-Int-Int b Z))",
+        "(= (Read-Int-Int (Write-Int-Int b j Z) Z) (Read-Int-Int b Z))",
+        "(= (Read-Int-Int (Write-Int-Int b_next pc_next i) Z) (Read-Int-Int b_next Z))",
+        "(= (Read-Int-Int (Write-Int-Int b Z pc_next) Z) pc_next)",
+        "(= (Read-Int-Int (Write-Int-Int b_next Z i) Z) i)",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!16 Z Z) Z) Z)",
+        "(= (Read-Int-Int (Write-Int-Int b_next Z i) Z) (Read-Int-Int b_next Z))",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!16 Z Z) Z) (Read-Int-Int Array-Int-Int!val!16 Z))",
+        "(= (Read-Int-Int (Write-Int-Int b Z pc_next) Z) (Read-Int-Int b Z))",
+    ],
+}

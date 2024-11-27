@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path};
 
 use action::Action;
 use array_abstractor::ArrayAbstractor;
@@ -12,8 +12,8 @@ use utils::{get_and_terms, get_transition_system_component, get_variables_and_ac
 use variable::Variable;
 
 use crate::{
-    concrete::{Command, FunctionDec, Identifier, Sort, Symbol, SyntaxBuilder, Term},
-    get_term_from_assert_command_string,
+    concrete::{self, Command, FunctionDec, Identifier, Sort, Symbol, SyntaxBuilder, Term},
+    get_term_from_assert_command_string, CommandStream,
 };
 
 static PROPERTY_ATTRIBUTE: &str = "invar-property";
@@ -48,9 +48,38 @@ pub struct VMTModel {
 #[derive(Debug)]
 pub enum VMTError {
     UnknownCommand(String),
+    FileError,
+    VisitorError,
+}
+
+impl From<std::io::Error> for VMTError {
+    fn from(_value: std::io::Error) -> Self {
+        VMTError::FileError
+    }
+}
+
+impl From<concrete::Error> for VMTError {
+    fn from(_value: concrete::Error) -> Self {
+        VMTError::VisitorError
+    }
 }
 
 impl VMTModel {
+    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, VMTError> {
+        let file = std::fs::File::open(path.as_ref())?;
+        let reader = std::io::BufReader::new(file);
+        let command_stream = CommandStream::new(
+            reader,
+            SyntaxBuilder,
+            Some(path.as_ref().to_string_lossy().to_string()),
+        );
+        VMTModel::checked_from(
+            command_stream
+                .into_iter()
+                .collect::<Result<Vec<_>, concrete::Error>>()?,
+        )
+    }
+
     pub fn checked_from(commands: Vec<Command>) -> Result<Self, VMTError> {
         let number_of_commands = commands.len();
         assert!(number_of_commands > 3, "Not enough commands for VMT model!");

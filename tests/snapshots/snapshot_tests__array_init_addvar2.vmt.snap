@@ -1,0 +1,18 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_init_addvar2.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int a Z 31110) Z) 31110)",
+        "(= (Read-Int-Int (Write-Int-Int a Z 16906) Z) 16906)",
+        "(= (Read-Int-Int (Write-Int-Int a Z 18586) Z) 18586)",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!16 Z 21236) Z) 21236)",
+        "(= (Read-Int-Int (Write-Int-Int a Z 16906) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!16 Z 21236) Z) (Read-Int-Int Array-Int-Int!val!16 Z))",
+        "(= (Read-Int-Int (Write-Int-Int a Z 31110) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int a Z 18586) Z) (Read-Int-Int a Z))",
+    ],
+}

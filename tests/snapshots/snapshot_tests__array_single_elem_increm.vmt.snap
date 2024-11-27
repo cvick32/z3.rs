@@ -1,0 +1,15 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_single_elem_increm.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int a Z 1) Z) 1)",
+        "(= (Read-Int-Int (Write-Int-Int a 0 39) 0) 39)",
+        "(= (Read-Int-Int (Write-Int-Int a 0 38) 0) 38)",
+        "(= (Read-Int-Int (Write-Int-Int a 0 (- 7681)) 0) (- 7681))",
+        "(= (Read-Int-Int (Write-Int-Int a 0 38) 0) (Read-Int-Int a 0))",
+    ],
+}

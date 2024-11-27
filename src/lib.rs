@@ -134,9 +134,7 @@ pub fn proof_loop(
 }
 
 pub fn model_from_options(options: &YardbirdOptions) -> VMTModel {
-    let content = std::io::BufReader::new(std::fs::File::open(options.filename.clone()).unwrap());
-    let commands = get_commands(content, options.filename.clone());
-    let concrete_vmt_model = VMTModel::checked_from(commands).unwrap();
+    let concrete_vmt_model = VMTModel::from_path(&options.filename).unwrap();
     let abstract_vmt_model = concrete_vmt_model.abstract_array_theory();
     if options.print_vmt {
         let mut output = File::create("original.vmt").unwrap();

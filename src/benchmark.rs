@@ -53,10 +53,7 @@ pub fn run_benchmarks(options: &YardbirdOptions) -> anyhow::Result<()> {
         info!("Trying: {}", path_string);
         let new_options = YardbirdOptions {
             filename: path_string.clone(),
-            depth: options.depth,
-            bmc_count: options.bmc_count,
-            print_vmt: options.print_vmt,
-            run_benchmarks: options.run_benchmarks,
+            ..options.clone()
         };
         let mut abstract_vmt_model = model_from_options(&new_options);
         let mut used_instances = vec![];

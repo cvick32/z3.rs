@@ -1,0 +1,11 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_tiling_pnr3.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!7 5 fixval) Z) (Read-Int-Int Array-Int-Int!val!7 Z))",
+    ],
+}

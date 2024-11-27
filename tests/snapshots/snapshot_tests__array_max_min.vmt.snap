@@ -1,0 +1,9 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_max_min.vmt",
+    status: Good,
+    used_instantiations: [],
+}

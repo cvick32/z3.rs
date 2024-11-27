@@ -1,0 +1,14 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_max_reverse_min.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int b Z 28194) Z) 28194)",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!15 Z (- (Read-Int-Int Array-Int-Int!val!16 Z))) Z) (- (Read-Int-Int Array-Int-Int!val!16 Z)))",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!15 Z (- (Read-Int-Int Array-Int-Int!val!16 Z))) Z) (Read-Int-Int Array-Int-Int!val!15 Z))",
+        "(= (Read-Int-Int (Write-Int-Int b Z 28194) Z) (Read-Int-Int b Z))",
+    ],
+}

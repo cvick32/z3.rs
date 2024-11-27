@@ -1,0 +1,13 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_index_compl.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int a N (- 7718)) i_next) (Read-Int-Int a i_next))",
+        "(= (Read-Int-Int (Write-Int-Int a 1 (- 1197)) i_next) (Read-Int-Int a i_next))",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!2 (- 1197) (- 8816)) i) (Read-Int-Int Array-Int-Int!val!2 i))",
+    ],
+}

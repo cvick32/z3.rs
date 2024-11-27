@@ -1,0 +1,12 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_init_both_ends2.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i i) i) i)",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i i) i) (Read-Int-Int Array-Int-Int!val!1 i))",
+    ],
+}

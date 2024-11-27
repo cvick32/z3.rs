@@ -1,0 +1,12 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "./examples/array_init_symmetr_swap_const.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!15 Z (Read-Int-Int a Z)) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!15 Z (Read-Int-Int a Z)) Z) (Read-Int-Int Array-Int-Int!val!15 Z))",
+    ],
+}
