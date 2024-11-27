@@ -60,4 +60,4 @@ The filename doesn't matter.
 - [ ] remove let statements when VMTModel is built so that we don't have to call LetExtract so much
 - [ ] fix 2dim benchmark with arrays of arrays
 - [ ] move benchmarks to using `cargo bench`
-- [ ] proper error handling
+- [x] proper error handling
