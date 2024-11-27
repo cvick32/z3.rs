@@ -5,6 +5,8 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::upper_case_acronyms)]
 #![allow(clippy::needless_lifetimes)]
+#![allow(clippy::diverging_sub_expression)]
+#![allow(clippy::let_unit_value)]
 
 pub use internal::{Parser, Token};
 
@@ -365,7 +367,7 @@ pub(crate) mod tests {
     use crate::{concrete::*, lexer::Lexer};
 
     pub(crate) fn parse_tokens<I: IntoIterator<Item = Token>>(tokens: I) -> Result<Command, Error> {
-        let mut builder = SyntaxBuilder::default();
+        let mut builder = SyntaxBuilder;
         let mut position = crate::Position::default();
         let mut p = Parser::new((&mut builder, &mut position));
         for token in tokens.into_iter() {
@@ -508,7 +510,7 @@ pub(crate) mod tests {
 
         assert!(matches!(value, Command::DeclareDatatypes { .. }));
         // Test syntax visiting while we're at it.
-        let mut builder = crate::concrete::SyntaxBuilder::default();
+        let mut builder = crate::concrete::SyntaxBuilder;
         assert_eq!(value, value.clone().accept(&mut builder).unwrap());
     }
 
@@ -519,29 +521,24 @@ pub(crate) mod tests {
         ))
         .unwrap();
 
-        match value {
-            Command::DefineFun { sig: _, term } => match term {
+        if let Command::DefineFun {
+            sig: _,
+            term:
                 Term::Attributes {
                     term: _,
                     attributes,
-                } => {
-                    assert!(attributes.len() == 1);
-                    let keyword = &attributes[0].0 .0;
-                    assert!(keyword == "invar-property");
-                    let value = &attributes[0].1;
-                    match value {
-                        AttributeValue::Constant(c) => match c {
-                            Constant::Numeral(big_uint) => {
-                                assert!(big_uint.eq(&BigUint::from(0 as u8)))
-                            }
-                            _ => assert!(false),
-                        },
-                        _ => assert!(false),
-                    }
-                }
-                _ => assert!(false),
-            },
-            _ => assert!(false),
-        };
+                },
+        } = value
+        {
+            assert!(attributes.len() == 1);
+            let keyword = &attributes[0].0 .0;
+            assert!(keyword == "invar-property");
+            let value = &attributes[0].1;
+            if let AttributeValue::Constant(Constant::Numeral(big_uint)) = value {
+                assert!(big_uint.eq(&BigUint::from(0_u8)))
+            }
+        }
+
+        panic!()
     }
 }
