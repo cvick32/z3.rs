@@ -1,10 +1,12 @@
 use clap::Parser;
 use log::info;
 use std::{fs::File, io::Write};
-use yardbird::{benchmark::run_benchmarks, model_from_options, proof_loop, YardbirdOptions};
+use yardbird::{
+    benchmark::run_benchmarks, logger, model_from_options, proof_loop, YardbirdOptions,
+};
 
 fn main() -> anyhow::Result<()> {
-    env_logger::init();
+    logger::init_logger();
     let options = YardbirdOptions::parse();
     if options.run_benchmarks {
         run_benchmarks(&options)

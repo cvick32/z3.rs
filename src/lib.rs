@@ -15,6 +15,7 @@ pub mod benchmark;
 pub mod conflict_scheduler;
 mod cost;
 mod egg_utils;
+pub mod logger;
 
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
@@ -23,19 +24,19 @@ pub struct YardbirdOptions {
     #[arg(short, long)]
     pub filename: String,
 
-    // BMC depth until quitting.
+    /// BMC depth until quitting.
     #[arg(short, long, default_value_t = 10)]
     pub depth: u8,
 
-    // How many times BMC should be UNSAT until we check with an invariant generator.
+    /// How many times BMC should be UNSAT until we check with an invariant generator.
     #[arg(short, long, default_value_t = 1)]
     pub bmc_count: usize,
 
-    // Output VMT files before and after instantiation.
+    /// Output VMT files before and after instantiation.
     #[arg(short, long, default_value_t = false)]
     pub print_vmt: bool,
 
-    // Run all of the benchmarks.
+    /// Run all of the benchmarks.
     #[arg(short, long, default_value_t = false)]
     pub run_benchmarks: bool,
 }
