@@ -114,9 +114,15 @@ pub fn proof_loop(
                     }
                     egraph.rebuild();
                     let instantiations = egraph.saturate();
-                    for inst in instantiations {
-                        // Adds the used instances.
-                        vmt_model.add_instantiation(inst, used_instances);
+
+                    // add all instantiations to the model,
+                    // if we have already seen all instantiations, break
+                    // TODO: not sure if this is correct...
+                    let no_progress = instantiations
+                        .into_iter()
+                        .all(|inst| !vmt_model.add_instantiation(inst, used_instances));
+                    if no_progress {
+                        break;
                     }
                 }
             }

@@ -1,13 +1,9 @@
-use std::{cell::RefCell, rc::Rc, str::FromStr};
+use std::{cell::RefCell, rc::Rc};
 
 use egg::{Analysis, Language};
 use log::debug;
-use smt2parser::vmt::VARIABLE_FRAME_DELIMITER;
 
-use crate::{
-    array_axioms::ArrayLanguage,
-    egg_utils::{DefaultCostFunction, RecExprRoot},
-};
+use crate::egg_utils::{DefaultCostFunction, RecExprRoot};
 
 #[derive(Clone)]
 pub struct ConflictScheduler<S> {
@@ -70,24 +66,24 @@ where
                 // construct a new term by instantiating variables in the pattern ast with terms
                 // from the substitution.
 
-                let new: egg::RecExpr<_> = unpatternify(reify_pattern_ast(ast, egraph, subst));
+                let new_lhs: egg::RecExpr<_> = unpatternify(reify_pattern_ast(ast, egraph, subst));
 
                 if let Some(applier_ast) = rewrite.applier.get_pattern_ast() {
                     let new_rhs: egg::RecExpr<_> =
                         unpatternify(reify_pattern_ast(applier_ast, egraph, subst));
-                    let blah = egraph.lookup_expr(&new_rhs);
+                    let rhs_eclass = egraph.lookup_expr(&new_rhs);
                     // the eclass that we would have inserted from this pattern
-                    // would cause a union from `blah` to `eclass`. This means it
+                    // would cause a union from `rhs_eclass` to `eclass`. This means it
                     // is creating an equality that wouldn't otherwise be in the
                     // e-graph. This is a conflict, so we record the rule instantiation
                     // here.
-                    if Some(m.eclass) != blah {
+                    if Some(m.eclass) != rhs_eclass {
                         println!("FOUND VIOLATION");
                         debug!("{applier_ast:#?}");
-                        println!("{} => {}", new.pretty(80), new_rhs.pretty(80));
+                        println!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
                         self.instantiations
                             .borrow_mut()
-                            .push(format!("(= {} {})", new, new_rhs));
+                            .push(format!("(= {} {})", new_lhs, new_rhs));
                     }
                 }
             }
@@ -96,6 +92,7 @@ where
         //     .inner
         //     .apply_rewrite(iteration, egraph, rewrite, matches);
         println!("<======");
+        // we don't actually want to apply the rewrite, because it would be a violation
         0
     }
 }

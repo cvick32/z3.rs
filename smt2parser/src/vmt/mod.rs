@@ -299,13 +299,13 @@ impl VMTModel {
             .collect()
     }
 
-    pub fn add_instantiation(&mut self, inst: String, instances: &mut Vec<String>) {
+    pub fn add_instantiation(&mut self, inst: String, instances: &mut Vec<String>) -> bool {
         let instance_term = self.get_instance_term(inst);
         let mut frame_getter = FrameNumGetter::new();
         instance_term.clone().accept(&mut frame_getter).unwrap();
         if frame_getter.frame_nums.len() > 2 || frame_getter.max_min_difference() > 1 {
             println!("NEED TO INSTANTIATE WITH PROPHECY");
-            return;
+            return false;
         }
         let mut instantiator = Instantiator {
             visitor: SyntaxBuilder,
@@ -315,7 +315,7 @@ impl VMTModel {
         let rewritten_term = instance_term.clone().accept(&mut instantiator).unwrap();
         if instances.contains(&rewritten_term.to_string()) {
             println!("ALREADY SEEN {} in {:?}", rewritten_term, instances);
-            return;
+            return false;
         } else {
             instances.push(rewritten_term.to_string());
         }
@@ -324,6 +324,7 @@ impl VMTModel {
             .add_instantiation_to_condition(rewritten_term.clone(), self.initial_condition.clone());
         self.transition_condition =
             self.add_instantiation_to_condition(rewritten_term, self.transition_condition.clone());
+        true
     }
 
     pub fn get_parametric_sort_names(&self) -> Vec<String> {
