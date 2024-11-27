@@ -1,6 +1,6 @@
 use crate::concrete::Command;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Variable {
     pub current: Command,
     pub next: Command,
