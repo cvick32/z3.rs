@@ -79,7 +79,6 @@ where
                     // here.
                     if Some(m.eclass) != rhs_eclass {
                         debug!("FOUND VIOLATION");
-                        debug!("{applier_ast:#?}");
                         debug!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
                         self.instantiations
                             .borrow_mut()
@@ -144,7 +143,6 @@ where
 fn unpatternify<L: egg::Language + std::fmt::Display>(
     pattern: egg::PatternAst<L>,
 ) -> egg::RecExpr<L> {
-    debug!("pat: {}", pattern.pretty(80));
     pattern
         .as_ref()
         .iter()

@@ -57,7 +57,7 @@ pub fn proof_loop(
             let smt = vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_smtlib2());
-            debug!("{}", solver);
+            debug!("smt2lib program:\n{}", smt.to_smtlib2());
             // TODO: abstract this out somehow
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
                 egg::EGraph::new(SaturationInequalities).with_explanations_enabled();
@@ -77,9 +77,10 @@ pub fn proof_loop(
                 z3::SatResult::Sat => {
                     // find Array theory fact that rules out counterexample
                     let model = solver.get_model().ok_or(anyhow!("No z3 model"))?;
-                    debug!("{}", model);
+                    debug!("model:\n{}", model);
 
                     for func_decl in model.iter() {
+                        debug!("do we get here? I think probably not");
                         if func_decl.arity() == 0 {
                             // VARIABLE
                             // Apply no arguments to the constant so we can call get_const_interp.
@@ -123,7 +124,7 @@ pub fn proof_loop(
                         .into_iter()
                         .all(|inst| !vmt_model.add_instantiation(inst, used_instances));
                     if no_progress {
-                        break;
+                        return Err(anyhow!("Failed to add new instantations"));
                     }
                 }
             }
