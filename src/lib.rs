@@ -6,7 +6,7 @@ use array_axioms::ArrayLanguage;
 use clap::Parser;
 use egg_utils::Saturate;
 use log::{debug, info};
-use smt2parser::{get_commands, vmt::VMTModel};
+use smt2parser::vmt::VMTModel;
 use z3::{Config, Context, Solver};
 
 pub mod analysis;
