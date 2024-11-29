@@ -6,7 +6,8 @@ BenchmarkResult {
     example_name: "./examples/array_two_counters_max_subtr.vmt",
     status: Good,
     used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i (- (Read-Int-Int Array-Int-Int!val!1 i))) i) (- (Read-Int-Int Array-Int-Int!val!1 i)))",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i (- (Read-Int-Int Array-Int-Int!val!1 i))) i) (Read-Int-Int Array-Int-Int!val!1 i))",
+        "(= (Read-Int-Int (Write-Int-Int a i (- (Read-Int-Int a i))) i) (- (Read-Int-Int a i)))",
+        "(= (Read-Int-Int (Write-Int-Int a_next i (- (Read-Int-Int a_next i))) i) (- (Read-Int-Int a_next i)))",
+        "(= (Read-Int-Int (Write-Int-Int a i (- (Read-Int-Int a i))) i) (Read-Int-Int a i))",
     ],
 }

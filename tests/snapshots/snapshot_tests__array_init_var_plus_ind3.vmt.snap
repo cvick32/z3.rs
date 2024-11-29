@@ -8,9 +8,7 @@ BenchmarkResult {
     used_instantiations: [
         "(= (Read-Int-Int (Write-Int-Int a Z j) Z) j)",
         "(= (Read-Int-Int (Write-Int-Int a Z i) Z) i)",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!2 Z i) Z) i)",
-        "(= (Read-Int-Int (Write-Int-Int a Z j) Z) (Read-Int-Int a Z))",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!2 Z i) Z) (Read-Int-Int Array-Int-Int!val!2 Z))",
-        "(= (Read-Int-Int (Write-Int-Int a Z i) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int a_next Z i) Z) i)",
+        "(= (Read-Int-Int (Write-Int-Int a_next Z i) Z) (Read-Int-Int a_next Z))",
     ],
 }

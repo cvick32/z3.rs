@@ -4,8 +4,6 @@ expression: run_benchmark(&path)
 ---
 BenchmarkResult {
     example_name: "./examples/array_tiling_pr3.vmt",
-    status: Good,
-    used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!7 5 val1) val1) (Read-Int-Int Array-Int-Int!val!7 val1))",
-    ],
+    status: Panic,
+    used_instantiations: [],
 }

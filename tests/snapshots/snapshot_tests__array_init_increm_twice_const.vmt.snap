@@ -7,10 +7,9 @@ BenchmarkResult {
     status: Good,
     used_instantiations: [
         "(= (Read-Int-Int (Write-Int-Int a i (+ (Read-Int-Int a i) Z)) i) (+ (Read-Int-Int a i) Z))",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!2 Z (+ (Read-Int-Int Array-Int-Int!val!2 Z) Z)) Z) (+ (Read-Int-Int Array-Int-Int!val!2 Z) Z))",
-        "(= (Read-Int-Int (Write-Int-Int a i (+ (Read-Int-Int a i) 1)) i) (+ (Read-Int-Int a i) 1))",
-        "(= (Read-Int-Int (Write-Int-Int a i (+ (Read-Int-Int a i) 1)) i) (Read-Int-Int a i))",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!2 Z (+ (Read-Int-Int Array-Int-Int!val!2 Z) Z)) Z) (Read-Int-Int Array-Int-Int!val!2 Z))",
-        "(= (Read-Int-Int (Write-Int-Int a i (+ (Read-Int-Int a i) Z)) i) (Read-Int-Int a i))",
+        "(= (Read-Int-Int (Write-Int-Int a Z (+ (Read-Int-Int a Z) Z)) Z) (+ (Read-Int-Int a Z) Z))",
+        "(= (Read-Int-Int (Write-Int-Int a Z 10077) Z) 10077)",
+        "(= (Read-Int-Int (Write-Int-Int a N (+ (Read-Int-Int a N) Z)) N) (+ (Read-Int-Int a N) Z))",
+        "(= (Read-Int-Int (Write-Int-Int a N (+ (Read-Int-Int a N) Z)) N) (Read-Int-Int a N))",
     ],
 }

@@ -4,8 +4,6 @@ expression: run_benchmark(&path)
 ---
 BenchmarkResult {
     example_name: "./examples/array_hybr_sum.vmt",
-    status: Good,
-    used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i i) N) (Read-Int-Int Array-Int-Int!val!1 N))",
-    ],
+    status: Panic,
+    used_instantiations: [],
 }

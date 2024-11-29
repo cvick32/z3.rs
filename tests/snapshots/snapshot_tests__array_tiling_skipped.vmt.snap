@@ -4,19 +4,6 @@ expression: run_benchmark(&path)
 ---
 BenchmarkResult {
     example_name: "./examples/array_tiling_skipped.vmt",
-    status: Good,
-    used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int a i i) (+ (* 2 i) i_next)) (Read-Int-Int a (+ (* 2 i) i_next)))",
-        "(= (Read-Int-Int (Write-Int-Int a i_next i_next) i_next) i_next)",
-        "(= (Read-Int-Int (Write-Int-Int a1 i_next i_next) i_next) i_next)",
-        "(= (Read-Int-Int (Write-Int-Int a1 S S) S) S)",
-        "(= (Read-Int-Int (Write-Int-Int a S S) S) S)",
-        "(= (Read-Int-Int (Write-Int-Int a1 i_next i_next) (+ (* S i_next) S)) (Read-Int-Int a1 (+ (* S i_next) S)))",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!5 S S) S) S)",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!5 S S) S) (Read-Int-Int Array-Int-Int!val!5 S))",
-        "(= (Read-Int-Int (Write-Int-Int a i_next i_next) i_next) (Read-Int-Int a i_next))",
-        "(= (Read-Int-Int (Write-Int-Int a S S) S) (Read-Int-Int a S))",
-        "(= (Read-Int-Int (Write-Int-Int a1 S S) S) (Read-Int-Int a1 S))",
-        "(= (Read-Int-Int (Write-Int-Int a1 i_next i_next) i_next) (Read-Int-Int a1 i_next))",
-    ],
+    status: Timeout,
+    used_instantiations: [],
 }

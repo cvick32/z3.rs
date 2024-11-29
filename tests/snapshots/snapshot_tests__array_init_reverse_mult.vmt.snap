@@ -6,7 +6,9 @@ BenchmarkResult {
     example_name: "./examples/array_init_reverse_mult.vmt",
     status: Good,
     used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 Z Z) Z) Z)",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 Z Z) Z) (Read-Int-Int Array-Int-Int!val!1 Z))",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) Z) Z)",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int a i 2436) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int a Z 2436) Z) 2436)",
     ],
 }

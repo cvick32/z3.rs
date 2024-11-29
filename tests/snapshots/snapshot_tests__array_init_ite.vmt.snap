@@ -6,7 +6,12 @@ BenchmarkResult {
     example_name: "./examples/array_init_ite.vmt",
     status: Good,
     used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i i) i) i)",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i i) i) (Read-Int-Int Array-Int-Int!val!1 i))",
+        "(= (Read-Int-Int (Write-Int-Int a i i) i) i)",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) i_next) (Read-Int-Int a i_next))",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) Z) Z)",
+        "(= (Read-Int-Int (Write-Int-Int a i i) i) (Read-Int-Int a i))",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) n) (Read-Int-Int a n))",
+        "(= (Read-Int-Int (Write-Int-Int a i i) Z) (Read-Int-Int a Z))",
     ],
 }

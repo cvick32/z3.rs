@@ -6,7 +6,8 @@ BenchmarkResult {
     example_name: "./examples/array_copy.vmt",
     status: Good,
     used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!2 i_next (Read-Int-Int a i_next)) i_next) (Read-Int-Int a i_next))",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!2 i_next (Read-Int-Int a i_next)) i_next) (Read-Int-Int Array-Int-Int!val!2 i_next))",
+        "(= (Read-Int-Int (Write-Int-Int b_next i_next (Read-Int-Int a i_next)) i_next) (Read-Int-Int a i_next))",
+        "(= (Read-Int-Int (Write-Int-Int b_next Z (Read-Int-Int a Z)) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int b_next Z (Read-Int-Int a Z)) Z) (Read-Int-Int b_next Z))",
     ],
 }

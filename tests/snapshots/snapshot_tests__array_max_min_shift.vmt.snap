@@ -4,19 +4,6 @@ expression: run_benchmark(&path)
 ---
 BenchmarkResult {
     example_name: "./examples/array_max_min_shift.vmt",
-    status: Good,
-    used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int b Z 45085) Z) 45085)",
-        "(= (Read-Int-Int (Write-Int-Int b Z 45085) Z) (Read-Int-Int b Z))",
-        "(= (Read-Int-Int (Write-Int-Int b Z max) Z) max)",
-        "(= (Read-Int-Int (Write-Int-Int b Z 99852) Z) 99852)",
-        "(= (Read-Int-Int (Write-Int-Int b Z 74278) Z) 74278)",
-        "(= (Read-Int-Int (Write-Int-Int b Z 54137) Z) 54137)",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!16 Z 45085) Z) 45085)",
-        "(= (Read-Int-Int (Write-Int-Int b Z max) Z) (Read-Int-Int b Z))",
-        "(= (Read-Int-Int (Write-Int-Int b Z 99852) Z) (Read-Int-Int b Z))",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!16 Z 45085) Z) (Read-Int-Int Array-Int-Int!val!16 Z))",
-        "(= (Read-Int-Int (Write-Int-Int b Z 54137) Z) (Read-Int-Int b Z))",
-        "(= (Read-Int-Int (Write-Int-Int b Z 74278) Z) (Read-Int-Int b Z))",
-    ],
+    status: Panic,
+    used_instantiations: [],
 }

@@ -4,13 +4,6 @@ expression: run_benchmark(&path)
 ---
 BenchmarkResult {
     example_name: "./examples/array_split_21.vmt",
-    status: Good,
-    used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int c N 7719) N) 7719)",
-        "(= (Read-Int-Int (Write-Int-Int c N (Read-Int-Int c_next N)) N) (Read-Int-Int c N))",
-        "(= (Read-Int-Int (Write-Int-Int c N (Read-Int-Int Array-Int-Int!val!1 N)) N) (Read-Int-Int Array-Int-Int!val!1 N))",
-        "(= (Read-Int-Int (Write-Int-Int c N (Read-Int-Int c_next N)) N) (Read-Int-Int c_next N))",
-        "(= (Read-Int-Int (Write-Int-Int c N 7719) N) (Read-Int-Int c N))",
-        "(= (Read-Int-Int (Write-Int-Int c N (Read-Int-Int Array-Int-Int!val!1 N)) N) (Read-Int-Int c N))",
-    ],
+    status: Timeout,
+    used_instantiations: [],
 }

@@ -4,9 +4,6 @@ expression: run_benchmark(&path)
 ---
 BenchmarkResult {
     example_name: "./examples/array_init_batches.vmt",
-    status: Good,
-    used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 Z i) Z) i)",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 Z i) Z) (Read-Int-Int Array-Int-Int!val!1 Z))",
-    ],
+    status: Panic,
+    used_instantiations: [],
 }

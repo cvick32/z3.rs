@@ -6,7 +6,10 @@ BenchmarkResult {
     example_name: "./examples/array_tiling_poly3.vmt",
     status: Good,
     used_instantiations: [
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i_next i) i_next) i)",
-        "(= (Read-Int-Int (Write-Int-Int Array-Int-Int!val!1 i_next i) i_next) (Read-Int-Int Array-Int-Int!val!1 i_next))",
+        "(= (Read-Int-Int (Write-Int-Int a_next i_next i) i_next) i)",
+        "(= (Read-Int-Int (Write-Int-Int a i Z) i) Z)",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) Z) Z)",
+        "(= (Read-Int-Int (Write-Int-Int a_next Z i) Z) (Read-Int-Int a_next Z))",
+        "(= (Read-Int-Int (Write-Int-Int a_next Z i) Z) i)",
     ],
 }

@@ -1172,6 +1172,7 @@ dependencies = [
  "env_logger 0.11.5",
  "insta",
  "log",
+ "rand 0.8.5",
  "serde",
  "serde_json",
  "smt2parser",

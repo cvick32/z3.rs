@@ -9,8 +9,6 @@ BenchmarkResult {
         "(= (Read-Int-Int (Write-Int-Int a i 37) i) 37)",
         "(= (Read-Int-Int (Write-Int-Int a i 7718) i) 7718)",
         "(= (Read-Int-Int (Write-Int-Int a i 37) i) (Read-Int-Int a i))",
-        "(= (Read-Int-Int (Write-Int-Int a i (Read-Int-Int Array-Int-Int!val!2 i)) i) (Read-Int-Int a i))",
-        "(= (Read-Int-Int (Write-Int-Int a i (Read-Int-Int Array-Int-Int!val!2 i)) i) (Read-Int-Int Array-Int-Int!val!2 i))",
         "(= (Read-Int-Int (Write-Int-Int a i 7718) i) (Read-Int-Int a i))",
     ],
 }
