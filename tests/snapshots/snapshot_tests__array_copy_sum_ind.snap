@@ -1,0 +1,25 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "examples/array_copy_sum_ind.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int c_next i_next i) i_next) i)",
+        "(= (Read-Int-Int (Write-Int-Int c i (Read-Int-Int b_next i)) i) (Read-Int-Int b_next i))",
+        "(= (Read-Int-Int (Write-Int-Int c i (- i)) i) (- i))",
+        "(= (Read-Int-Int (Write-Int-Int c_next i_next (Read-Int-Int a i_next)) i_next) (Read-Int-Int a i_next))",
+        "(= (Read-Int-Int (Write-Int-Int c i 18458) i) 18458)",
+        "(= (Read-Int-Int (Write-Int-Int c i (- 26286)) i) (- 26286))",
+        "(= (Read-Int-Int (Write-Int-Int c i (- 2648)) i) (- 2648))",
+        "(= (Read-Int-Int (Write-Int-Int c i (- 36460)) i) (- 36460))",
+        "(= (Read-Int-Int (Write-Int-Int c i 72918) i) 72918)",
+        "(= (Read-Int-Int (Write-Int-Int c i 41076) i) 41076)",
+        "(= (Read-Int-Int (Write-Int-Int c_next Z i) Z) i)",
+        "(= (Read-Int-Int (Write-Int-Int c i 18458) i) (Read-Int-Int c i))",
+        "(= (Read-Int-Int (Write-Int-Int c Z 18458) Z) 18458)",
+        "(= (Read-Int-Int (Write-Int-Int c i 42735) Z) (Read-Int-Int c Z))",
+        "(= (Read-Int-Int (Write-Int-Int c Z 42735) Z) 42735)",
+    ],
+}

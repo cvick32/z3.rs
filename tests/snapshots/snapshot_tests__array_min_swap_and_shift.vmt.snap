@@ -1,9 +1,0 @@
----
-source: tests/snapshot_tests.rs
-expression: run_benchmark(&path)
----
-BenchmarkResult {
-    example_name: "./examples/array_min_swap_and_shift.vmt",
-    status: Panic,
-    used_instantiations: [],
-}

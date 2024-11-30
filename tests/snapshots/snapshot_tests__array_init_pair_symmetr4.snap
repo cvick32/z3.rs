@@ -1,0 +1,9 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "examples/array_init_pair_symmetr4.vmt",
+    status: Panic,
+    used_instantiations: [],
+}

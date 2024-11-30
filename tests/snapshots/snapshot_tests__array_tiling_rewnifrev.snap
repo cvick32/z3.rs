@@ -1,0 +1,20 @@
+---
+source: tests/snapshot_tests.rs
+expression: run_benchmark(&path)
+---
+BenchmarkResult {
+    example_name: "examples/array_tiling_rewnifrev.vmt",
+    status: Good,
+    used_instantiations: [
+        "(= (Read-Int-Int (Write-Int-Int a1 i i) i) i)",
+        "(= (Read-Int-Int (Write-Int-Int a1 i i) i) (Read-Int-Int a1 i))",
+        "(= (Read-Int-Int (Write-Int-Int a1_next i_next i_next) i) (Read-Int-Int a1_next i))",
+        "(= (Read-Int-Int (Write-Int-Int a1 Z Z) Z) Z)",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) Z) Z)",
+        "(= (Read-Int-Int (Write-Int-Int a Z Z) Z) (Read-Int-Int a Z))",
+        "(= (Read-Int-Int (Write-Int-Int a1 i i) i_next) (Read-Int-Int a1 i_next))",
+        "(= (Read-Int-Int (Write-Int-Int a1 Z Z) Z) (Read-Int-Int a1 Z))",
+        "(= (Read-Int-Int (Write-Int-Int a1 Z Z) i_next) (Read-Int-Int a1 i_next))",
+        "(= (Read-Int-Int (Write-Int-Int a1 i i) Z) (Read-Int-Int a1 Z))",
+    ],
+}

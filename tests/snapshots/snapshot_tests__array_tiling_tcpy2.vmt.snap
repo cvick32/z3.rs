@@ -1,9 +1,0 @@
----
-source: tests/snapshot_tests.rs
-expression: run_benchmark(&path)
----
-BenchmarkResult {
-    example_name: "./examples/array_tiling_tcpy2.vmt",
-    status: Timeout,
-    used_instantiations: [],
-}
