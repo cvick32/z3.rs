@@ -367,8 +367,15 @@ impl VMTModel {
             .collect::<Vec<_>>()
     }
 
-    pub fn get_state_holding_vars(&self) -> Vec<Variable> {
-        self.state_variables.clone()
+    pub fn get_state_holding_variables(&self) -> Vec<Variable> {
+        let mut state_holding_variables = vec![];
+        for state_variable in self.state_variables.clone() {
+            if !state_variable.get_current_variable_name().contains("fml") {
+                // Do not include formal arguments in state holding variables.
+                state_holding_variables.push(state_variable);
+            }
+        }
+        state_holding_variables
     }
 
     fn add_instantiation_to_condition(&self, instantiation: Term, condition: Term) -> Term {
