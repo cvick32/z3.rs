@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::concrete::{Command, Identifier, Term};
 
-use super::{action::Action, variable::Variable};
+use super::{action::Action, variable::Variable, axiom::Axiom};
 
 pub fn assert_term(term: &Term) -> String {
     format!("(assert {})", term)
@@ -42,12 +42,13 @@ pub fn get_and_terms(term: Box<Term>) -> Vec<Term> {
     }
 }
 
-pub fn get_variables_and_actions(
+pub fn get_variables_actions_and_axioms(
     variable_relationships: Vec<&Command>,
     variable_commands: HashMap<String, Command>,
-) -> (Vec<Variable>, Vec<Action>) {
+) -> (Vec<Variable>, Vec<Action>, Vec<Axiom>) {
     let mut state_variables: Vec<Variable> = vec![];
     let mut actions: Vec<Action> = vec![];
+    let mut axioms: Vec<Axiom> = vec![];
     for variable_relationship in variable_relationships {
         match variable_relationship {
             Command::DefineFun { sig: _, term } => match term {
@@ -84,6 +85,9 @@ pub fn get_variables_and_actions(
                         } else {
                             panic!("Proposed action variable {} not previously defined.", term);
                         }
+                    } else if keyword_string == ":axiom" {
+                        axioms.push(Axiom{_axiom: *term.clone()});
+
                     } else {
                         panic!("Only `next` and `action` keyword attributes are allowed in variable relationships found: {}", keyword_string);
                     }
@@ -93,7 +97,7 @@ pub fn get_variables_and_actions(
             _ => panic!("Variable Relationship is not a (define-fun)."),
         }
     }
-    (state_variables, actions)
+    (state_variables, actions, axioms)
 }
 
 pub fn scrub_variable_name(variable_name: String) -> String {
@@ -142,7 +146,7 @@ pub fn get_transition_system_component(command: &Command, attribute: &str) -> Te
         }
     } else {
         panic!(
-            "Ill-formed system component: {}.\nShould have {} as attribute.",
+            "Initial, transition, and property commands must be the final three commands in the file.\nIll-formed system component: {}.\nShould have {} as attribute.",
             command, attribute
         );
     }

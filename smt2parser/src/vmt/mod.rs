@@ -2,13 +2,14 @@ use std::{collections::HashMap, path::Path};
 
 use action::Action;
 use array_abstractor::ArrayAbstractor;
+use axiom::Axiom;
 use bmc::BMCBuilder;
 use frame_num_getter::FrameNumGetter;
 use instantiator::Instantiator;
 use itertools::Itertools;
 use log::{debug, info};
 use smt::SMTProblem;
-use utils::{get_and_terms, get_transition_system_component, get_variables_and_actions};
+use utils::{get_and_terms, get_transition_system_component, get_variables_actions_and_axioms};
 use variable::Variable;
 
 use crate::{
@@ -22,6 +23,7 @@ static INITIAL_ATTRIBUTE: &str = "init";
 
 mod action;
 mod array_abstractor;
+mod axiom;
 mod bmc;
 mod frame_num_getter;
 mod instantiator;
@@ -40,6 +42,7 @@ pub struct VMTModel {
     state_variables: Vec<Variable>,
     function_definitions: Vec<Command>,
     actions: Vec<Action>,
+    _axioms: Vec<Axiom>,
     initial_condition: Term,
     transition_condition: Term,
     property_condition: Term,
@@ -123,14 +126,15 @@ impl VMTModel {
                 }
             }
         }
-        let (state_variables, actions) =
-            get_variables_and_actions(variable_relationships, variable_commands);
+        let (state_variables, actions, axioms) =
+            get_variables_actions_and_axioms(variable_relationships, variable_commands);
 
         Ok(VMTModel {
             sorts,
             function_definitions,
             state_variables,
             actions,
+            _axioms: axioms,
             initial_condition,
             transition_condition,
             property_condition,
@@ -209,7 +213,6 @@ impl VMTModel {
         };
         let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
 
-        smt_problem.add_assertion(&self.initial_condition, builder.clone());
         for _ in 0..1 {
             // Must add variable definitions for each variable at each time step.
             smt_problem.add_variable_definitions(
