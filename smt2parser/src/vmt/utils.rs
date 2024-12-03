@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::concrete::{Command, Identifier, Term};
 
-use super::{action::Action, variable::Variable, axiom::Axiom};
+use super::{action::Action, axiom::Axiom, variable::Variable};
 
 pub fn assert_term(term: &Term) -> String {
     format!("(assert {})", term)
@@ -86,8 +86,9 @@ pub fn get_variables_actions_and_axioms(
                             panic!("Proposed action variable {} not previously defined.", term);
                         }
                     } else if keyword_string == ":axiom" {
-                        axioms.push(Axiom{_axiom: *term.clone()});
-
+                        axioms.push(Axiom {
+                            _axiom: *term.clone(),
+                        });
                     } else {
                         panic!("Only `next` and `action` keyword attributes are allowed in variable relationships found: {}", keyword_string);
                     }
