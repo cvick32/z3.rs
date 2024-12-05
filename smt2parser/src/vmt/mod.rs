@@ -228,6 +228,19 @@ impl VMTModel {
         smt_problem
     }
 
+    pub fn get_property_term(&self) -> SMTProblem {
+        let builder = BMCBuilder {
+            visitor: SyntaxBuilder,
+            current_variables: self.get_all_current_variable_names(),
+            next_variables: self.get_next_to_current_varible_names(),
+            step: 0,
+        };
+        let mut smt_problem = SMTProblem::new(&self.sorts, &self.function_definitions);
+        smt_problem.add_variable_definitions(&self.state_variables, &self.actions, builder.clone());
+        smt_problem.add_property_assertion(&self.property_condition, builder.clone());
+        smt_problem
+    }
+
     pub fn as_commands(&self) -> Vec<Command> {
         let mut commands = self.sorts.clone();
         commands.extend(self.function_definitions.clone());
@@ -373,10 +386,15 @@ impl VMTModel {
     pub fn get_state_holding_variables(&self) -> Vec<Variable> {
         let mut state_holding_variables = vec![];
         for state_variable in self.state_variables.clone() {
-            if !state_variable.get_current_variable_name().contains("fml") {
+            // TODO: make this more principled by checking which variables occur as "next"
+            if state_variable.get_current_variable_name().contains("fml") {
                 // Do not include formal arguments in state holding variables.
-                state_holding_variables.push(state_variable);
+                continue;
+            } else if state_variable.get_current_variable_name().starts_with("__") {
+                // Do not include formal arguments in state holding variables.
+                continue;
             }
+            state_holding_variables.push(state_variable);
         }
         state_holding_variables
     }

@@ -1,7 +1,7 @@
 use egg::Language;
 use smt2parser::vmt::VARIABLE_FRAME_DELIMITER;
 
-use crate::array_axioms::ArrayLanguage;
+use crate::{array_axioms::ArrayLanguage, egg_utils::CompareCost};
 
 /// Cost function describing how to extract terms from an eclass while we are
 /// instantiating a rule violation with concrete terms.
@@ -19,29 +19,39 @@ impl egg::CostFunction<ArrayLanguage> for BestVariableSubstitution {
         //       over Nums
         let op_cost = match enode {
             ArrayLanguage::Num(_) => 10,
-            ArrayLanguage::ConstArr(_) => 1,
-            ArrayLanguage::Write(_) => 1,
-            ArrayLanguage::Read(_) => 1,
-            ArrayLanguage::And(_) => 1,
-            ArrayLanguage::Not(_) => 1,
-            ArrayLanguage::Or(_) => 1,
-            ArrayLanguage::Implies(_) => 1,
-            ArrayLanguage::Eq(_) => 1,
-            ArrayLanguage::Geq(_) => 1,
-            ArrayLanguage::Gt(_) => 1,
-            ArrayLanguage::Leq(_) => 1,
-            ArrayLanguage::Lt(_) => 1,
-            ArrayLanguage::Plus(_) => 1,
-            ArrayLanguage::Negate(_) => 1,
-            ArrayLanguage::Times(_) => 1,
+            ArrayLanguage::ConstArr(_) => 0,
+            ArrayLanguage::Write(_) => 0,
+            ArrayLanguage::Read(_) => 0,
+            ArrayLanguage::And(_) => 0,
+            ArrayLanguage::Not(_) => 0,
+            ArrayLanguage::Or(_) => 0,
+            ArrayLanguage::Implies(_) => 0,
+            ArrayLanguage::Eq(_) => 0,
+            ArrayLanguage::Geq(_) => 0,
+            ArrayLanguage::Gt(_) => 0,
+            ArrayLanguage::Leq(_) => 0,
+            ArrayLanguage::Lt(_) => 0,
+            ArrayLanguage::Plus(_) => 0,
+            ArrayLanguage::Negate(_) => 0,
+            ArrayLanguage::Times(_) => 0,
             ArrayLanguage::Symbol(sym) => {
                 if sym.as_str().contains(VARIABLE_FRAME_DELIMITER) {
-                    1
+                    0
                 } else {
+                    // TODO: extend language to uninterpreted sort constants to 
+                    // constants instead of symbols. 
+                    // Ex: Array-Int-Int!val!0 is currently a symbol when it should be a
+                    // constant.
                     10
                 }
             }
         };
         enode.fold(op_cost, |sum, id| sum + costs(id))
+    }
+}
+
+impl CompareCost<ArrayLanguage> for BestVariableSubstitution {
+    fn lt(&self, x: Self::Cost, y: u32) -> bool {
+        x < y
     }
 }

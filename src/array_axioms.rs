@@ -49,7 +49,7 @@ where
 }
 
 impl DefaultCostFunction for ArrayLanguage {
-    fn cost_function() -> impl egg::CostFunction<ArrayLanguage> {
+    fn cost_function() -> impl crate::egg_utils::CompareCost<Self> {
         BestVariableSubstitution
     }
 }
@@ -75,7 +75,10 @@ where
     let var_0 = index_0.parse().unwrap();
     let var_1 = index_1.parse().unwrap();
 
-    move |egraph, _, subst| egraph.find(subst[var_0]) != egraph.find(subst[var_1])
+    move |egraph, _, subst| {
+        panic!("in not equal");
+        egraph.find(subst[var_0]) != egraph.find(subst[var_1])
+    }
 }
 
 #[cfg(test)]
@@ -96,6 +99,34 @@ mod test {
 
     #[test]
     fn test_conditional_axioms1() {
+        let expr: RecExpr<ArrayLanguage> =
+            "(Read-Int-Int (Write-Int-Int A 0 0) 0)".parse().unwrap();
+        let runner = Runner::default()
+            .with_expr(&expr)
+            .run(&array_axioms::<()>());
+
+        let gold: RecExpr<ArrayLanguage> = "(Read-Int-Int A 0)".parse().unwrap();
+        assert!(runner.egraph.lookup_expr(&gold).is_none())
+    }
+
+    #[test]
+    fn test_conditional_axioms0_with_scheduluer() {
+        let expr: RecExpr<ArrayLanguage> =
+            "(Read-Int-Int (Write-Int-Int A 0 0) 1)".parse().unwrap();
+
+        let scheduler = ConflictScheduler::new(BackoffScheduler::default());
+        let instantiations = scheduler.instantiations();
+        let runner = Runner::default()
+            .with_expr(&expr)
+            .with_scheduler(scheduler)
+            .run(&array_axioms::<()>());
+
+        println!("{:?}", instantiations.borrow().len());
+        assert!(instantiations.borrow().len() == 1);
+    }
+
+    #[test]
+    fn test_conditional_axioms1_with_scheduler() {
         let expr: RecExpr<ArrayLanguage> =
             "(Read-Int-Int (Write-Int-Int A 0 0) 0)".parse().unwrap();
         let runner = Runner::default()

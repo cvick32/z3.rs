@@ -1,7 +1,9 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{any::Any, cell::RefCell, rc::Rc, sync::Arc};
 
-use egg::{Analysis, Language};
+use crate::egg_utils::CompareCost;
+use egg::{Analysis, ConditionalApplier, CostFunction, Language, Var};
 use log::debug;
+use serde::de::IntoDeserializer;
 
 use crate::egg_utils::{DefaultCostFunction, RecExprRoot};
 
@@ -47,6 +49,10 @@ where
     ) -> Vec<egg::SearchMatches<'a, L>> {
         self.inner.search_rewrite(iteration, egraph, rewrite)
     }
+    // r1, read-after-write
+    // r2, write-doesnt-overwrite
+    /// r2.rewrite(m) => (Implies (not (= a c)) ...)
+    /// r1.rewrite(m) =>
 
     fn apply_rewrite(
         &mut self,
@@ -61,8 +67,18 @@ where
             if let Some(cow_ast) = &m.ast {
                 let subst = &m.substs[0];
                 debug!("cur sub: {:?}", subst);
+
                 // transform &Cow<T> -> &T
                 let ast = cow_ast.as_ref();
+                if rewrite.name.as_str() == "write-does-not-overwrite" {
+                    // TODO: currently checking the rewrite condition as a hack...
+                    let idx1 = subst.get("?c".parse().unwrap()).unwrap();
+                    let idx2 = subst.get("?idx".parse().unwrap()).unwrap();
+                    if egraph.find(*idx1) == egraph.find(*idx2) {
+                        continue;
+                    }
+                }
+
                 // construct a new term by instantiating variables in the pattern ast with terms
                 // from the substitution.
 
@@ -71,6 +87,12 @@ where
                 if let Some(applier_ast) = rewrite.applier.get_pattern_ast() {
                     let new_rhs: egg::RecExpr<_> =
                         unpatternify(reify_pattern_ast(applier_ast, egraph, subst));
+                    let cost = L::cost_function().cost_rec(&new_rhs);
+                    if !L::cost_function().lt(cost, 1) {
+                        // If the new pattern containts any non-variable, continue.
+                        continue;
+                    }
+
                     let rhs_eclass = egraph.lookup_expr(&new_rhs);
                     // the eclass that we would have inserted from this pattern
                     // would cause a union from `rhs_eclass` to `eclass`. This means it
@@ -80,6 +102,7 @@ where
                     if Some(m.eclass) != rhs_eclass {
                         debug!("FOUND VIOLATION");
                         debug!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
+
                         self.instantiations
                             .borrow_mut()
                             .push(format!("(= {} {})", new_lhs, new_rhs));
@@ -173,6 +196,7 @@ where
         eclass.id,
         expr.pretty(80)
     );
+    //if L::cost_function().compare(cost, 4) {
     // wrap everything in an ENodeOrVar so that it still counts as an egg::PatternAst
     expr.as_ref()
         .iter()
@@ -180,4 +204,6 @@ where
         .map(egg::ENodeOrVar::ENode)
         .collect::<Vec<_>>()
         .into()
+
+    //  }
 }
