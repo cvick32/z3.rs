@@ -1,7 +1,7 @@
 use crate::{
     concrete::{Command, Term},
     let_extract::LetExtract,
-    vmt::utils::{assert_negation, assert_term},
+    vmt::utils::{assert_negation, assert_negation_interpolant, assert_term, assert_term_interpolant},
 };
 
 use super::{action::Action, bmc::BMCBuilder, variable::Variable};
@@ -99,7 +99,7 @@ impl SMTProblem {
         assert_terms
     }
 
-    pub fn to_smtlib2(&self) -> String {
+    pub fn to_bmc(&self) -> String {
         let sort_names = self
             .sorts
             .iter()
@@ -126,6 +126,42 @@ impl SMTProblem {
             .join("\n");
         let property_assert = match &self.property_assertion {
             Some(prop) => assert_negation(prop),
+            None => String::new(),
+        };
+        format!(
+            "{}\n{}\n{}\n{}\n{}",
+            sort_names, function_definitions, defs, init_and_trans_asserts, property_assert
+        )
+    }
+
+    pub fn to_smtinterpol(&self) -> String {
+        let sort_names = self
+            .sorts
+            .iter()
+            .map(|sort| sort.to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+        let function_definitions = self
+            .function_definitions
+            .iter()
+            .map(|fd| fd.to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+        let defs = self
+            .variable_definitions
+            .iter()
+            .map(|def| def.to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+        let init_and_trans_asserts = self
+            .init_and_trans_assertions
+            .iter()
+            .enumerate()
+            .map(|(i, assertion)| assert_term_interpolant(i, assertion))
+            .collect::<Vec<String>>()
+            .join("\n");
+        let property_assert = match &self.property_assertion {
+            Some(prop) => assert_negation_interpolant(self.init_and_trans_length(), prop),
             None => String::new(),
         };
         format!(

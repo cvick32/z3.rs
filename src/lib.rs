@@ -56,8 +56,8 @@ pub fn proof_loop(
             // Currently run once, this will eventually run until UNSAT
             let smt = vmt_model.unroll(depth);
             let solver = Solver::new(&context);
-            solver.from_string(smt.to_smtlib2());
-            debug!("smt2lib program:\n{}", smt.to_smtlib2());
+            solver.from_string(smt.to_bmc());
+            debug!("smt2lib program:\n{}", smt.to_bmc());
             // TODO: abstract this out somehow
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
                 egg::EGraph::new(SaturationInequalities).with_explanations_enabled();
@@ -67,6 +67,8 @@ pub fn proof_loop(
             match solver.check() {
                 z3::SatResult::Unsat => {
                     info!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
+                    // TODO: collect interpolants at depth. 
+                    println!("{}", smt.to_smtinterpol());
                     break;
                 }
                 z3::SatResult::Unknown => {
@@ -117,8 +119,6 @@ pub fn proof_loop(
                     egraph.rebuild();
                     let instantiations = egraph.saturate();
                     println!("{:#?}", instantiations);
-                    panic!();
-
                     // add all instantiations to the model,
                     // if we have already seen all instantiations, break
                     // TODO: not sure if this is correct...
