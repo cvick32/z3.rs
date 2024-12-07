@@ -38,8 +38,8 @@ impl egg::CostFunction<ArrayLanguage> for BestVariableSubstitution {
                 if sym.as_str().contains(VARIABLE_FRAME_DELIMITER) {
                     0
                 } else {
-                    // TODO: extend language to uninterpreted sort constants to 
-                    // constants instead of symbols. 
+                    // TODO: extend language to uninterpreted sort constants to
+                    // constants instead of symbols.
                     // Ex: Array-Int-Int!val!0 is currently a symbol when it should be a
                     // constant.
                     10

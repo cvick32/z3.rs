@@ -7,6 +7,7 @@ use clap::Parser;
 use egg_utils::Saturate;
 use log::{debug, info};
 use smt2parser::vmt::VMTModel;
+use utils::run_smtinterpol;
 use z3::{Config, Context, Solver};
 
 pub mod analysis;
@@ -16,6 +17,7 @@ pub mod conflict_scheduler;
 mod cost;
 mod egg_utils;
 pub mod logger;
+mod utils;
 
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
@@ -67,8 +69,8 @@ pub fn proof_loop(
             match solver.check() {
                 z3::SatResult::Unsat => {
                     info!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
-                    // TODO: collect interpolants at depth. 
-                    println!("{}", smt.to_smtinterpol());
+                    // TODO: collect interpolants at depth.
+                    let _ = run_smtinterpol(smt);
                     break;
                 }
                 z3::SatResult::Unknown => {
