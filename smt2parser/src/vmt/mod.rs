@@ -27,7 +27,7 @@ mod axiom;
 mod bmc;
 mod frame_num_getter;
 mod instantiator;
-mod smt;
+pub mod smt;
 mod utils;
 pub mod variable;
 
