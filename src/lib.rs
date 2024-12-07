@@ -70,7 +70,9 @@ pub fn proof_loop(
                 z3::SatResult::Unsat => {
                     info!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
                     // TODO: collect interpolants at depth.
-                    let _ = run_smtinterpol(smt);
+                    let _interpolants = run_smtinterpol(smt)?;
+                    //println!("Hot, fresh interpolants: {:#?}", interpolants);
+                    //panic!();
                     break;
                 }
                 z3::SatResult::Unknown => {
