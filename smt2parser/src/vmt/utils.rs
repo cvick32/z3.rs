@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use num::range;
 
-use crate::concrete::{Command, Identifier, Term};
+use crate::{concrete::{Command, Identifier, Term}, vmt::canonicalize_boolean::{self, CanonicalizeBooleanFunctions}};
 
 use super::{action::Action, axiom::Axiom, variable::Variable};
 
@@ -21,17 +21,21 @@ pub fn assert_negation(assertion: &Term) -> String {
 }
 
 pub fn assert_term_interpolant(i: usize, assertion: &Term) -> String {
+    let mut canonicalize_and = CanonicalizeBooleanFunctions{};
+    let canonical = assertion.clone().accept_term_visitor(&mut canonicalize_and).unwrap();
     format!(
         "(assert (! {} :named {}))",
-        assertion,
+        canonical,
         get_interpolant_name(i)
     )
 }
 
 pub fn assert_negation_interpolant(i: usize, assertion: &Term) -> String {
+    let mut canonicalize_and = CanonicalizeBooleanFunctions{};
+    let canonical = assertion.clone().accept_term_visitor(&mut canonicalize_and).unwrap();
     format!(
         "(assert (! (not {}) :named {}))",
-        assertion,
+        canonical,
         get_interpolant_name(i)
     )
 }
