@@ -537,8 +537,8 @@ pub(crate) mod tests {
             if let AttributeValue::Constant(Constant::Numeral(big_uint)) = value {
                 assert!(big_uint.eq(&BigUint::from(0_u8)))
             }
+        } else {
+            panic!()
         }
-
-        panic!()
     }
 }
