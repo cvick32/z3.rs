@@ -1,10 +1,15 @@
 use crate::{
     concrete::{Command, Term},
     let_extract::LetExtract,
-    vmt::utils::{assert_negation, assert_negation_interpolant, assert_term, assert_term_interpolant},
+    vmt::utils::{
+        assert_negation, assert_negation_interpolant, assert_term, assert_term_interpolant,
+        get_interpolant_command,
+    },
 };
 
 use super::{action::Action, bmc::BMCBuilder, variable::Variable};
+
+static SMT_INTERPOL_OPTIONS: &str = "(set-option :print-success false)\n(set-option :produce-interpolants true)\n(set-logic QF_UFLIA)";
 
 #[derive(Default)]
 pub struct SMTProblem {
@@ -164,9 +169,16 @@ impl SMTProblem {
             Some(prop) => assert_negation_interpolant(self.init_and_trans_length(), prop),
             None => String::new(),
         };
+        let interpolant_command = get_interpolant_command(self.init_and_trans_length());
         format!(
-            "{}\n{}\n{}\n{}\n{}",
-            sort_names, function_definitions, defs, init_and_trans_asserts, property_assert
+            "{}\n{}\n{}\n{}\n{}\n{}\n{}",
+            SMT_INTERPOL_OPTIONS,
+            sort_names,
+            function_definitions,
+            defs,
+            init_and_trans_asserts,
+            property_assert,
+            interpolant_command
         )
     }
 }

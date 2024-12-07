@@ -1,10 +1,16 @@
 use std::collections::HashMap;
 
+use itertools::Itertools;
+use num::range;
+
 use crate::concrete::{Command, Identifier, Term};
 
 use super::{action::Action, axiom::Axiom, variable::Variable};
 
-static INTERPOLANT_NAMES: [&str; 26] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+static INTERPOLANT_NAMES: [&str; 26] = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+    "T", "U", "V", "W", "X", "Y", "Z",
+];
 
 pub fn assert_term(assertion: &Term) -> String {
     format!("(assert {})", assertion)
@@ -14,13 +20,32 @@ pub fn assert_negation(assertion: &Term) -> String {
     format!("(assert (not {}))", assertion)
 }
 
-
 pub fn assert_term_interpolant(i: usize, assertion: &Term) -> String {
-    format!("(assert (! {}) :{})", assertion, get_interpolant_name(i))
+    format!(
+        "(assert (! {} :named {}))",
+        assertion,
+        get_interpolant_name(i)
+    )
 }
 
 pub fn assert_negation_interpolant(i: usize, assertion: &Term) -> String {
-    format!("(assert (! (not {})) :{})", assertion, get_interpolant_name(i))
+    format!(
+        "(assert (! (not {}) :named {}))",
+        assertion,
+        get_interpolant_name(i)
+    )
+}
+
+pub fn get_interpolant_command(i: usize) -> String {
+    format!("(check-sat)\n{}", get_interpolant_names(i))
+}
+
+fn get_interpolant_names(i: usize) -> String {
+    let names: String = range(0, i + 1)
+        .into_iter()
+        .map(|num| get_interpolant_name(num))
+        .join(" ");
+    format!("(get-interpolants {names})")
 }
 
 fn get_interpolant_name(i: usize) -> String {
@@ -32,7 +57,6 @@ fn get_interpolant_name(i: usize) -> String {
         INTERPOLANT_NAMES[0].to_owned() + &get_interpolant_name(rest)
     }
 }
-
 
 /// Only call this method if you're sure that the given Term is or should be
 /// an `and` Application. It will panic if not.
