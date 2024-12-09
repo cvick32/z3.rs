@@ -70,9 +70,11 @@ pub fn proof_loop(
                 z3::SatResult::Unsat => {
                     info!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
                     // TODO: collect interpolants at depth.
-                    let _interpolants = run_smtinterpol(smt)?;
-                    //println!("Hot, fresh interpolants: {:#?}", interpolants);
-                    //panic!();
+                    let interpolants = run_smtinterpol(smt);
+                    match interpolants {
+                        Ok(interps) => (),
+                        Err(err) => println!("Error when computing interpolants: {err}"),
+                    }
                     break;
                 }
                 z3::SatResult::Unknown => {
@@ -122,7 +124,7 @@ pub fn proof_loop(
                     }
                     egraph.rebuild();
                     let instantiations = egraph.saturate();
-                    println!("{:#?}", instantiations);
+                    //println!("{:#?}", instantiations);
                     // add all instantiations to the model,
                     // if we have already seen all instantiations, break
                     // TODO: not sure if this is correct...
