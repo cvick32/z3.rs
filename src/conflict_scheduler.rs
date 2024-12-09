@@ -49,10 +49,6 @@ where
     ) -> Vec<egg::SearchMatches<'a, L>> {
         self.inner.search_rewrite(iteration, egraph, rewrite)
     }
-    // r1, read-after-write
-    // r2, write-doesnt-overwrite
-    /// r2.rewrite(m) => (Implies (not (= a c)) ...)
-    /// r1.rewrite(m) =>
 
     fn apply_rewrite(
         &mut self,
@@ -70,14 +66,6 @@ where
 
                 // transform &Cow<T> -> &T
                 let ast = cow_ast.as_ref();
-                if rewrite.name.as_str() == "write-does-not-overwrite" {
-                    // TODO: currently checking the rewrite condition as a hack...
-                    let idx1 = subst.get("?c".parse().unwrap()).unwrap();
-                    let idx2 = subst.get("?idx".parse().unwrap()).unwrap();
-                    if egraph.find(*idx1) == egraph.find(*idx2) {
-                        continue;
-                    }
-                }
 
                 // construct a new term by instantiating variables in the pattern ast with terms
                 // from the substitution.
@@ -87,11 +75,12 @@ where
                 if let Some(applier_ast) = rewrite.applier.get_pattern_ast() {
                     let new_rhs: egg::RecExpr<_> =
                         unpatternify(reify_pattern_ast(applier_ast, egraph, subst));
-                    let cost = L::cost_function().cost_rec(&new_rhs);
-                    if !L::cost_function().lt(cost, 1) {
-                        // If the new pattern containts any non-variable, continue.
-                        continue;
-                    }
+                    // let cost = L::cost_function().cost_rec(&new_rhs);
+                    // if !L::cost_function().lt(cost, 1) {
+                    //     // If the new pattern contains any non-variable, continue.
+                    //     debug!("rejecting because of cost");
+                    //     continue;
+                    // }
 
                     let rhs_eclass = egraph.lookup_expr(&new_rhs);
                     // the eclass that we would have inserted from this pattern
