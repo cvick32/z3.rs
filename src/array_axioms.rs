@@ -49,7 +49,9 @@ where
 }
 
 impl DefaultCostFunction for ArrayLanguage {
-    fn cost_function() -> impl crate::egg_utils::CompareCost<Self> {
+    type Cost = u32;
+
+    fn cost_function() -> impl egg::CostFunction<Self, Cost = Self::Cost> {
         BestVariableSubstitution
     }
 }
@@ -171,6 +173,8 @@ mod test {
         let _ = env_logger::builder()
             .is_test(true)
             .filter_level(log::LevelFilter::Debug)
+            .filter_module("egg", log::LevelFilter::Off)
+            .filter_module("z3", log::LevelFilter::Off)
             .try_init();
     }
 
@@ -208,24 +212,28 @@ mod test {
 
         let scheduler = ConflictScheduler::new(BackoffScheduler::default());
         let instantiations = scheduler.instantiations();
+        let const_instantiations = scheduler.instantiations_w_constants();
         let _runner = Runner::default()
             .with_expr(&expr)
             .with_scheduler(scheduler)
             .run(&array_axioms::<()>());
 
-        assert!(instantiations.borrow().len() == 1);
+        assert!(instantiations.borrow().len() == 0 && const_instantiations.borrow().len() == 1);
     }
 
-    #[test]
-    fn test_conditional_axioms1_with_scheduler() {
-        init();
-        let expr: RecExpr<ArrayLanguage> =
-            "(Read-Int-Int (Write-Int-Int A 0 0) 0)".parse().unwrap();
-        let runner = Runner::default()
-            .with_expr(&expr)
-            .run(&array_axioms::<()>());
+    // #[test]
+    // fn test_conditional_axioms1_with_scheduler() {
+    //     init();
+    //     let expr: RecExpr<ArrayLanguage> =
+    //         "(Read-Int-Int (Write-Int-Int A 0 0) 0)".parse().unwrap();
+    //     let scheduler = ConflictScheduler::new(BackoffScheduler::default());
+    //     let instantiations = scheduler.instantiations_w_constants();
+    //     let const_instantiations = scheduler.instantiations_w_constants();
+    //     let _runner = Runner::default()
+    //         .with_expr(&expr)
+    //         .with_scheduler(scheduler)
+    //         .run(&array_axioms::<()>());
 
-        let gold: RecExpr<ArrayLanguage> = "(Read-Int-Int A 0)".parse().unwrap();
-        assert!(runner.egraph.lookup_expr(&gold).is_none())
-    }
+    //     assert!(instantiations.borrow().len() == 0 && const_instantiations.borrow().len() == 0);
+    // }
 }

@@ -5,11 +5,8 @@ pub trait Saturate {
 }
 
 pub trait DefaultCostFunction: egg::Language {
-    fn cost_function() -> impl CompareCost<Self>;
-}
-
-pub trait CompareCost<L: egg::Language>: egg::CostFunction<L> {
-    fn lt(&self, x: Self::Cost, y: u32) -> bool;
+    type Cost: PartialOrd + std::fmt::Debug + Clone;
+    fn cost_function() -> impl egg::CostFunction<Self, Cost = Self::Cost>;
 }
 
 pub trait RecExprRoot<L> {

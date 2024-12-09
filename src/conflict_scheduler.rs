@@ -1,9 +1,7 @@
-use std::{any::Any, cell::RefCell, rc::Rc, sync::Arc};
+use std::{cell::RefCell, rc::Rc};
 
-use crate::egg_utils::CompareCost;
-use egg::{Analysis, ConditionalApplier, CostFunction, Language, Var};
+use egg::{Analysis, CostFunction, Language};
 use log::debug;
-use serde::de::IntoDeserializer;
 
 use crate::egg_utils::{DefaultCostFunction, RecExprRoot};
 
@@ -16,6 +14,7 @@ pub struct ConflictScheduler<S> {
     /// in order to be able to get data out of the scheduler after a saturation run, we
     /// need to use interior mutability.
     instantiations: Rc<RefCell<Vec<String>>>,
+    instantiations_w_constants: Rc<RefCell<Vec<String>>>,
 }
 
 impl<S> ConflictScheduler<S> {
@@ -23,18 +22,23 @@ impl<S> ConflictScheduler<S> {
         Self {
             inner: scheduler,
             instantiations: Rc::new(RefCell::new(vec![])),
+            instantiations_w_constants: Rc::new(RefCell::new(vec![])),
         }
     }
 
     pub fn instantiations(&self) -> Rc<RefCell<Vec<String>>> {
         Rc::clone(&self.instantiations)
     }
+
+    pub fn instantiations_w_constants(&self) -> Rc<RefCell<Vec<String>>> {
+        Rc::clone(&self.instantiations_w_constants)
+    }
 }
 
 impl<S, L, N> egg::RewriteScheduler<L, N> for ConflictScheduler<S>
 where
     S: egg::RewriteScheduler<L, N>,
-    L: egg::Language + DefaultCostFunction + std::fmt::Display,
+    L: egg::Language + DefaultCostFunction<Cost = u32> + std::fmt::Display,
     N: egg::Analysis<L>,
 {
     fn can_stop(&mut self, iteration: usize) -> bool {
@@ -69,18 +73,11 @@ where
 
                 // construct a new term by instantiating variables in the pattern ast with terms
                 // from the substitution.
-
                 let new_lhs: egg::RecExpr<_> = unpatternify(reify_pattern_ast(ast, egraph, subst));
 
                 if let Some(applier_ast) = rewrite.applier.get_pattern_ast() {
                     let new_rhs: egg::RecExpr<_> =
                         unpatternify(reify_pattern_ast(applier_ast, egraph, subst));
-                    // let cost = L::cost_function().cost_rec(&new_rhs);
-                    // if !L::cost_function().lt(cost, 1) {
-                    //     // If the new pattern contains any non-variable, continue.
-                    //     debug!("rejecting because of cost");
-                    //     continue;
-                    // }
 
                     let rhs_eclass = egraph.lookup_expr(&new_rhs);
                     // the eclass that we would have inserted from this pattern
@@ -92,9 +89,17 @@ where
                         debug!("FOUND VIOLATION");
                         debug!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
 
-                        self.instantiations
-                            .borrow_mut()
-                            .push(format!("(= {} {})", new_lhs, new_rhs));
+                        let cost = L::cost_function().cost_rec(&new_rhs);
+                        if cost > 1 {
+                            debug!("rejecting because of cost");
+                            self.instantiations_w_constants
+                                .borrow_mut()
+                                .push(format!("(= {} {})", new_lhs, new_rhs));
+                        } else {
+                            self.instantiations
+                                .borrow_mut()
+                                .push(format!("(= {} {})", new_lhs, new_rhs));
+                        }
                     }
                 }
             }
