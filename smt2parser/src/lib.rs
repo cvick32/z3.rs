@@ -31,7 +31,7 @@
 extern crate pomelo;
 
 pub mod concrete;
-mod let_extract;
+pub mod let_extract;
 mod lexer;
 mod parser;
 pub mod renaming;
