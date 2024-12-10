@@ -20,7 +20,7 @@ impl egg::CostFunction<ArrayLanguage> for BestVariableSubstitution {
         let op_cost = match enode {
             // Scale cost of term w.r.t size of constant. This will only work when we want
             // small values like adding one or something.
-            ArrayLanguage::Num(num) => 100, //u32::try_from(*num).ok().unwrap(),
+            ArrayLanguage::Num(_) => 100, //u32::try_from(*num).ok().unwrap(),
             ArrayLanguage::ConstArr(_) => 0,
             // NOTE: try changing the value of Write from 0 to 10 for
             // `array_init_var.vmt`. Notice that when we allow Write terms

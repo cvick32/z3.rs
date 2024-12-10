@@ -53,7 +53,7 @@ pub fn proof_loop(
     options: &YardbirdOptions,
     used_instances: &mut Vec<String>,
 ) -> anyhow::Result<VMTModel> {
-    let mut abstract_vmt_model = model_from_options(&options);
+    let mut abstract_vmt_model = model_from_options(options);
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
     for depth in 0..options.depth {
