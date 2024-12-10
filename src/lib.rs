@@ -129,7 +129,6 @@ pub fn proof_loop(
                     }
                     egraph.rebuild();
                     let instantiations = egraph.saturate();
-                    println!("{:#?}", instantiations);
 
                     // add all instantiations to the model,
                     // if we have already seen all instantiations, break
@@ -144,7 +143,6 @@ pub fn proof_loop(
             }
         }
     }
-    info!("USED INSTANCES: {:#?}", used_instances);
     Ok(abstract_vmt_model)
 }
 
