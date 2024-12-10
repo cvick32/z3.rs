@@ -25,9 +25,10 @@ mod action;
 mod array_abstractor;
 mod axiom;
 mod bmc;
+mod canonicalize_boolean;
 mod frame_num_getter;
 mod instantiator;
-mod smt;
+pub mod smt;
 mod utils;
 pub mod variable;
 

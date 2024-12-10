@@ -89,16 +89,28 @@ where
                         debug!("FOUND VIOLATION");
                         debug!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
 
+                        let instantiation = if rewrite.name.as_str() == "write-does-not-overwrite" {
+                            let idx1 = subst.get("?c".parse().unwrap()).unwrap();
+                            let idx2 = subst.get("?idx".parse().unwrap()).unwrap();
+                            let extractor = egg::Extractor::new(egraph, L::cost_function());
+                            let (_, expr1) = extractor.find_best(*idx1);
+                            let (_, expr2) = extractor.find_best(*idx2);
+                            format!(
+                                "(=> (not (= {} {})) (= {} {}))",
+                                expr1, expr2, new_lhs, new_rhs
+                            )
+                        } else {
+                            format!("(= {} {})", new_lhs, new_rhs)
+                        };
+
                         let cost = L::cost_function().cost_rec(&new_rhs);
                         if cost > 1 {
                             debug!("rejecting because of cost");
                             self.instantiations_w_constants
                                 .borrow_mut()
-                                .push(format!("(= {} {})", new_lhs, new_rhs));
+                                .push(instantiation);
                         } else {
-                            self.instantiations
-                                .borrow_mut()
-                                .push(format!("(= {} {})", new_lhs, new_rhs));
+                            self.instantiations.borrow_mut().push(instantiation);
                         }
                     }
                 }

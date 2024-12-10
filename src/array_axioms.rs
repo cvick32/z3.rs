@@ -87,7 +87,6 @@ where
 {
     let var_0 = index_0.parse().unwrap();
     let var_1 = index_1.parse().unwrap();
-
     move |egraph, _, subst| egraph.find(subst[var_0]) != egraph.find(subst[var_1])
 }
 

@@ -7,6 +7,7 @@ use clap::Parser;
 use egg_utils::Saturate;
 use log::{debug, info};
 use smt2parser::vmt::VMTModel;
+use utils::run_smtinterpol;
 use z3::{Config, Context, Solver};
 
 pub mod analysis;
@@ -16,6 +17,7 @@ pub mod conflict_scheduler;
 mod cost;
 mod egg_utils;
 pub mod logger;
+mod utils;
 
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
@@ -56,8 +58,8 @@ pub fn proof_loop(
             // Currently run once, this will eventually run until UNSAT
             let smt = vmt_model.unroll(depth);
             let solver = Solver::new(&context);
-            solver.from_string(smt.to_smtlib2());
-            debug!("smt2lib program:\n{}", smt.to_smtlib2());
+            solver.from_string(smt.to_bmc());
+            debug!("smt2lib program:\n{}", smt.to_bmc());
             // TODO: abstract this out somehow
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
                 egg::EGraph::new(SaturationInequalities).with_explanations_enabled();
@@ -67,6 +69,12 @@ pub fn proof_loop(
             match solver.check() {
                 z3::SatResult::Unsat => {
                     info!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
+                    // TODO: collect interpolants at depth.
+                    let interpolants = run_smtinterpol(smt);
+                    match interpolants {
+                        Ok(_interps) => (),
+                        Err(err) => println!("Error when computing interpolants: {err}"),
+                    }
                     break;
                 }
                 z3::SatResult::Unknown => {
@@ -80,7 +88,6 @@ pub fn proof_loop(
                     debug!("model:\n{}", model);
 
                     for func_decl in model.iter() {
-                        debug!("do we get here? I think probably not");
                         if func_decl.arity() == 0 {
                             // VARIABLE
                             // Apply no arguments to the constant so we can call get_const_interp.

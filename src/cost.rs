@@ -18,9 +18,17 @@ impl egg::CostFunction<ArrayLanguage> for BestVariableSubstitution {
         //       right now all I am doing is preferring everything else
         //       over Nums
         let op_cost = match enode {
-            ArrayLanguage::Num(_) => 10,
+            // Scale cost of term w.r.t size of constant. This will only work when we want
+            // small values like adding one or something.
+            ArrayLanguage::Num(num) => u32::try_from(*num).ok().unwrap(),
             ArrayLanguage::ConstArr(_) => 0,
-            ArrayLanguage::Write(_) => 0,
+            // NOTE: try changing the value of Write from 0 to 10 for
+            // `array_init_var.vmt`. Notice that when we allow Write terms
+            // to be used in axiom instantiations we end up with a chain of
+            // rewrites that use `Write`. When we change it to 10, we automatically
+            // rule out these very specific chains of Writes and are able to
+            // generate a single instance that generalizes immediately.
+            ArrayLanguage::Write(_) => 10,
             ArrayLanguage::Read(_) => 0,
             ArrayLanguage::And(_) => 0,
             ArrayLanguage::Not(_) => 0,
