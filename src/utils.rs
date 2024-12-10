@@ -1,9 +1,5 @@
 use crate::interpolant::Interpolant;
-use smt2parser::{
-    get_term_from_term_string,
-    let_extract::LetExtract,
-    vmt::smt::SMTProblem,
-};
+use smt2parser::{get_term_from_term_string, let_extract::LetExtract, vmt::smt::SMTProblem};
 use std::{
     fs::File,
     io::{Error, Write},

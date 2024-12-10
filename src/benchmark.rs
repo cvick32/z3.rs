@@ -57,13 +57,7 @@ pub fn run_benchmarks(options: &YardbirdOptions) -> anyhow::Result<()> {
         };
         let mut used_instances = vec![];
         let result = run_with_timeout(
-            move || {
-                proof_loop(
-                    &new_options,
-                    &mut used_instances,
-                )
-                .ok()
-            },
+            move || proof_loop(&new_options, &mut used_instances).ok(),
             Duration::from_secs(10),
         );
         bench_results.push(BenchmarkResult {
