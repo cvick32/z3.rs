@@ -123,7 +123,8 @@ pub fn proof_loop(
                     }
                     egraph.rebuild();
                     let instantiations = egraph.saturate();
-                    //println!("{:#?}", instantiations);
+                    println!("{:#?}", instantiations);
+
                     // add all instantiations to the model,
                     // if we have already seen all instantiations, break
                     // TODO: not sure if this is correct...

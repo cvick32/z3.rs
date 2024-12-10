@@ -388,8 +388,8 @@ impl VMTModel {
         let mut state_holding_variables = vec![];
         for state_variable in self.state_variables.clone() {
             // TODO: make this more principled by checking which variables occur as "next"
-            if state_variable.get_current_variable_name().contains("fml") ||
-            state_variable.get_current_variable_name().starts_with("__") {
+            let var_name = state_variable.get_current_variable_name();
+            if var_name.contains("fml") || var_name.starts_with("__") {
                 // Do not include formal arguments in state holding variables.
                 continue;
             }

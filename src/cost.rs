@@ -1,7 +1,7 @@
 use egg::Language;
 use smt2parser::vmt::VARIABLE_FRAME_DELIMITER;
 
-use crate::{array_axioms::ArrayLanguage, egg_utils::CompareCost};
+use crate::array_axioms::ArrayLanguage;
 
 /// Cost function describing how to extract terms from an eclass while we are
 /// instantiating a rule violation with concrete terms.
@@ -55,11 +55,5 @@ impl egg::CostFunction<ArrayLanguage> for BestVariableSubstitution {
             }
         };
         enode.fold(op_cost, |sum, id| sum + costs(id))
-    }
-}
-
-impl CompareCost<ArrayLanguage> for BestVariableSubstitution {
-    fn lt(&self, x: Self::Cost, y: u32) -> bool {
-        x < y
     }
 }
