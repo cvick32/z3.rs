@@ -1,9 +1,8 @@
-use std::{any::Any, cell::RefCell, rc::Rc, sync::Arc};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::egg_utils::CompareCost;
-use egg::{Analysis, ConditionalApplier, CostFunction, Language, Var};
+use egg::{Analysis, CostFunction, Language};
 use log::debug;
-use serde::de::IntoDeserializer;
 
 use crate::egg_utils::{DefaultCostFunction, RecExprRoot};
 

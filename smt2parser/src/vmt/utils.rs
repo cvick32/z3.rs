@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use num::range;
 
-use crate::{concrete::{Command, Identifier, Term}, vmt::canonicalize_boolean::{self, CanonicalizeBooleanFunctions}};
+use crate::{concrete::{Command, Identifier, Term}, vmt::canonicalize_boolean::CanonicalizeBooleanFunctions};
 
 use super::{action::Action, axiom::Axiom, variable::Variable};
 
@@ -46,8 +46,7 @@ pub fn get_interpolant_command(i: usize) -> String {
 
 fn get_interpolant_names(i: usize) -> String {
     let names: String = range(0, i + 1)
-        .into_iter()
-        .map(|num| get_interpolant_name(num))
+        .map(get_interpolant_name)
         .join(" ");
     format!("(get-interpolants {names})")
 }

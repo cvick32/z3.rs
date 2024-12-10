@@ -2,7 +2,7 @@ use smt2parser::{
     get_term_from_assert_command_string, let_extract::LetExtract, vmt::smt::SMTProblem,
 };
 use std::{
-    f32::INFINITY, fs::File, io::{Error, Write}, process::Command
+    fs::File, io::{Error, Write}, process::Command
 };
 
 static INTERPOLANT_FILENAME: &str = "interpolant-out.smt2";
@@ -36,7 +36,7 @@ pub fn run_smtinterpol(smt_problem: SMTProblem) -> Result<Vec<String>, Error> {
     let mut let_extract = LetExtract::default();
     let sequent_interpolant = term.clone().accept_term_visitor(&mut let_extract).unwrap();
     // Interpolants will now be the arguments to the `and` term created above. 
-    let interpolants = match sequent_interpolant {
+    let _interpolants = match sequent_interpolant {
         smt2parser::concrete::Term::Application { qual_identifier: _, arguments } => arguments,
         _ => panic!("Sequent interpolant is not `and` application.")
     };

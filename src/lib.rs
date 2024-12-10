@@ -72,7 +72,7 @@ pub fn proof_loop(
                     // TODO: collect interpolants at depth.
                     let interpolants = run_smtinterpol(smt);
                     match interpolants {
-                        Ok(interps) => (),
+                        Ok(_interps) => (),
                         Err(err) => println!("Error when computing interpolants: {err}"),
                     }
                     break;
@@ -88,7 +88,6 @@ pub fn proof_loop(
                     debug!("model:\n{}", model);
 
                     for func_decl in model.iter() {
-                        debug!("do we get here? I think probably not");
                         if func_decl.arity() == 0 {
                             // VARIABLE
                             // Apply no arguments to the constant so we can call get_const_interp.
