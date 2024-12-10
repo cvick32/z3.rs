@@ -1465,7 +1465,6 @@ fn test_syntax_visitor() {
             }),
         },
     };
-    let mut builder = SyntaxBuilder::default();
-    let command2 = command.clone().accept(&mut builder).unwrap();
+    let command2 = command.clone().accept(&mut SyntaxBuilder).unwrap();
     assert_eq!(command, command2);
 }
