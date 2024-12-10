@@ -50,14 +50,28 @@ To run all of the benchmarks we currently have run:
 `cargo run -- --filename blah  --run-all > all.txt `
 The filename doesn't matter. 
 
+# Getting More Information into the EGraph
+
+Right now (12/9) on `array_copy_increment_ind.vmt` we are unable to find any instantiations without constants. 
+We could just remove the limitation on generating instantiations with no constants, but that doesn't solve the 
+problem. The main problem is that we find an instantitation like: 
+
+`(= (Read-Int-Int (Write-Int-Int b@1 i@1 7720) i@1) 7720)`
+
+This is true, but what we really want if we look at the program is:
+`(= (Read-Int-Int (Write-Int-Int b@1 i@1 (+ 1 (Read-Int-Int a@1 i@1))) i@1) (+ 1 (Read-Int-Int a@1 i@1)))`
+
+In this case, the EGraph doesn't know about the equality 7720 = 7719 + 1. What happens is that when we're 
+adding the function interpretation from the model we add `(Write b@1 i@1 7720)` and we forget the fact that
+how we got to 7720 was by adding 1 to the Read term. 
+
+We should be able to evaluate some terms in the BMC model and add some facts to the egraph that way. 
 
 # TODOs
-
-- [ ] computing interpolants
-- [ ] ranking violations that egg finds
-  - always prefer read terms?
-  - only apply rewrites that fall into a particular vocabulary
 - [ ] remove let statements when VMTModel is built so that we don't have to call LetExtract so much
-- [ ] fix 2dim benchmark with arrays of arrays
 - [ ] move benchmarks to using `cargo bench`
+- [ ] further testing of cost function
+- [x] fix 2dim benchmark with arrays of arrays
 - [x] proper error handling
+- [x] computing interpolants
+- [x] ranking violations that egg finds
