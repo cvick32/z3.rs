@@ -228,6 +228,7 @@ pub fn command_has_attribute_string(command: &Command, attribute: &str) -> bool 
 }
 
 mod tests {
+    #[allow(unused_imports)]
     use crate::vmt::utils::get_interpolant_name;
 
     #[test]
