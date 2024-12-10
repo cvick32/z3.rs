@@ -20,7 +20,7 @@ impl egg::CostFunction<ArrayLanguage> for BestVariableSubstitution {
         let op_cost = match enode {
             // Scale cost of term w.r.t size of constant. This will only work when we want
             // small values like adding one or something.
-            ArrayLanguage::Num(num) => u32::try_from(*num).ok().unwrap(),
+            ArrayLanguage::Num(num) => 100, //u32::try_from(*num).ok().unwrap(),
             ArrayLanguage::ConstArr(_) => 0,
             // NOTE: try changing the value of Write from 0 to 10 for
             // `array_init_var.vmt`. Notice that when we allow Write terms
@@ -28,29 +28,29 @@ impl egg::CostFunction<ArrayLanguage> for BestVariableSubstitution {
             // rewrites that use `Write`. When we change it to 10, we automatically
             // rule out these very specific chains of Writes and are able to
             // generate a single instance that generalizes immediately.
-            ArrayLanguage::Write(_) => 10,
-            ArrayLanguage::Read(_) => 0,
-            ArrayLanguage::And(_) => 0,
-            ArrayLanguage::Not(_) => 0,
-            ArrayLanguage::Or(_) => 0,
-            ArrayLanguage::Implies(_) => 0,
-            ArrayLanguage::Eq(_) => 0,
-            ArrayLanguage::Geq(_) => 0,
-            ArrayLanguage::Gt(_) => 0,
-            ArrayLanguage::Leq(_) => 0,
-            ArrayLanguage::Lt(_) => 0,
-            ArrayLanguage::Plus(_) => 0,
-            ArrayLanguage::Negate(_) => 0,
-            ArrayLanguage::Times(_) => 0,
+            ArrayLanguage::Write(_) => 1,
+            ArrayLanguage::Read(_) => 1,
+            ArrayLanguage::And(_) => 1,
+            ArrayLanguage::Not(_) => 1,
+            ArrayLanguage::Or(_) => 1,
+            ArrayLanguage::Implies(_) => 1,
+            ArrayLanguage::Eq(_) => 1,
+            ArrayLanguage::Geq(_) => 1,
+            ArrayLanguage::Gt(_) => 1,
+            ArrayLanguage::Leq(_) => 1,
+            ArrayLanguage::Lt(_) => 1,
+            ArrayLanguage::Plus(_) => 1,
+            ArrayLanguage::Negate(_) => 1,
+            ArrayLanguage::Times(_) => 1,
             ArrayLanguage::Symbol(sym) => {
                 if sym.as_str().contains(VARIABLE_FRAME_DELIMITER) {
-                    0
+                    1
                 } else {
                     // TODO: extend language to uninterpreted sort constants to
                     // constants instead of symbols.
                     // Ex: Array-Int-Int!val!0 is currently a symbol when it should be a
                     // constant.
-                    10
+                    100
                 }
             }
         };

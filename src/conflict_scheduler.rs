@@ -104,7 +104,7 @@ where
                         };
 
                         let cost = L::cost_function().cost_rec(&new_rhs);
-                        if cost > 1 {
+                        if cost >= 100 {
                             debug!("rejecting because of cost");
                             self.instantiations_w_constants
                                 .borrow_mut()

@@ -36,6 +36,7 @@ pub fn run_smtinterpol(smt_problem: SMTProblem) -> Result<Vec<Interpolant>, Erro
     let mut let_extract = LetExtract::default();
     let sequent_interpolant = term.clone().accept_term_visitor(&mut let_extract).unwrap();
     // Interpolants will now be the arguments to the `and` term created above.
+    println!("----------------------------------------");
     let interpolants = match sequent_interpolant {
         smt2parser::concrete::Term::Application {
             qual_identifier: _,

@@ -9,7 +9,7 @@ use std::{
 use log::info;
 use serde::Serialize;
 
-use crate::{model_from_options, proof_loop, YardbirdOptions};
+use crate::{proof_loop, YardbirdOptions};
 
 #[derive(Debug, Serialize)]
 enum BenchResult {
