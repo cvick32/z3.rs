@@ -2,7 +2,9 @@ use smt2parser::{
     get_term_from_assert_command_string, let_extract::LetExtract, vmt::smt::SMTProblem,
 };
 use std::{
-    fs::File, io::{Error, Write}, process::Command
+    fs::File,
+    io::{Error, Write},
+    process::Command,
 };
 
 static INTERPOLANT_FILENAME: &str = "interpolant-out.smt2";
@@ -23,29 +25,32 @@ pub fn run_smtinterpol(smt_problem: SMTProblem) -> Result<Vec<String>, Error> {
         .split("\n")
         .map(|s| s.to_string())
         .collect::<Vec<_>>();
-    
+
     // First element should always be 'unsat' from (check-sat) call.
     assert_eq!(stdout[0], "unsat");
     // Second element is the sequent interpolant.
     let mut interpolants = stdout[1].clone();
-    let dd = interpolants.clone();
+    let standin = interpolants.clone();
     // Have to add `and` to the interpolant to make it valid smt2
     interpolants.insert_str(1, "and ");
     // Format it to `assert` call so smt2parser can handle it.
     let term = get_term_from_assert_command_string(format!("(assert {})", interpolants).as_bytes());
     let mut let_extract = LetExtract::default();
     let sequent_interpolant = term.clone().accept_term_visitor(&mut let_extract).unwrap();
-    // Interpolants will now be the arguments to the `and` term created above. 
+    // Interpolants will now be the arguments to the `and` term created above.
     let _interpolants = match sequent_interpolant {
-        smt2parser::concrete::Term::Application { qual_identifier: _, arguments } => arguments,
-        _ => panic!("Sequent interpolant is not `and` application.")
+        smt2parser::concrete::Term::Application {
+            qual_identifier: _,
+            arguments,
+        } => arguments,
+        _ => panic!("Sequent interpolant is not `and` application."),
     };
-    let mut i = 0;
-    println!("-----------------------{}---------------------------", interpolants.len());
-    for interp in interpolants {
+    /* let mut i = 0;
+    println!("-----------------------{}---------------------------", _interpolants.len());
+    for interp in _interpolants {
         println!("{i}: {interp}");
         i += 1;
-    }
+    } */
 
-    Ok(vec![dd])
+    Ok(vec![standin])
 }

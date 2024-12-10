@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use num::range;
 
-use crate::{concrete::{Command, Identifier, Term}, vmt::canonicalize_boolean::CanonicalizeBooleanFunctions};
+use crate::{
+    concrete::{Command, Identifier, Term},
+    vmt::canonicalize_boolean::CanonicalizeBooleanFunctions,
+};
 
 use super::{action::Action, axiom::Axiom, variable::Variable};
 
@@ -21,8 +24,11 @@ pub fn assert_negation(assertion: &Term) -> String {
 }
 
 pub fn assert_term_interpolant(i: usize, assertion: &Term) -> String {
-    let mut canonicalize_and = CanonicalizeBooleanFunctions{};
-    let canonical = assertion.clone().accept_term_visitor(&mut canonicalize_and).unwrap();
+    let mut canonicalize_and = CanonicalizeBooleanFunctions {};
+    let canonical = assertion
+        .clone()
+        .accept_term_visitor(&mut canonicalize_and)
+        .unwrap();
     format!(
         "(assert (! {} :named {}))",
         canonical,
@@ -31,8 +37,11 @@ pub fn assert_term_interpolant(i: usize, assertion: &Term) -> String {
 }
 
 pub fn assert_negation_interpolant(i: usize, assertion: &Term) -> String {
-    let mut canonicalize_and = CanonicalizeBooleanFunctions{};
-    let canonical = assertion.clone().accept_term_visitor(&mut canonicalize_and).unwrap();
+    let mut canonicalize_and = CanonicalizeBooleanFunctions {};
+    let canonical = assertion
+        .clone()
+        .accept_term_visitor(&mut canonicalize_and)
+        .unwrap();
     format!(
         "(assert (! (not {}) :named {}))",
         canonical,
@@ -45,9 +54,7 @@ pub fn get_interpolant_command(i: usize) -> String {
 }
 
 fn get_interpolant_names(i: usize) -> String {
-    let names: String = range(0, i + 1)
-        .map(get_interpolant_name)
-        .join(" ");
+    let names: String = range(0, i + 1).map(get_interpolant_name).join(" ");
     format!("(get-interpolants {names})")
 }
 
