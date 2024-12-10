@@ -65,7 +65,24 @@ In this case, the EGraph doesn't know about the equality 7720 = 7719 + 1. What h
 adding the function interpretation from the model we add `(Write b@1 i@1 7720)` and we forget the fact that
 how we got to 7720 was by adding 1 to the Read term. 
 
-We should be able to evaluate some terms in the BMC model and add some facts to the egraph that way. 
+We should be able to evaluate some terms in the BMC model and add some facts to the egraph that way.
+
+;(and (= (Write-Int-Int b@0 i@0 (+ 1 (Read-Int-Int a@0 i@0))) b@1) (= (+ i@0 1) i@1) (= a@0 a@1) (= Z@0 Z@1))
+
+terms currently added:
+
+b@0
+i@0
+b@1 
+a@0
+a@0
+
+don't have:
+tt: Z3Object = (+ 1 (Read-Int-Int a@0 i@0))
+
+egraph.join(model.eval(tt), tt)
+
+
 
 # TODOs
 - [ ] remove let statements when VMTModel is built so that we don't have to call LetExtract so much
