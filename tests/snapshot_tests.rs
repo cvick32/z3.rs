@@ -1,12 +1,11 @@
 use insta::assert_debug_snapshot;
-use smt2parser::vmt::VMTModel;
 use std::{
     path::Path,
     sync::mpsc::{self, RecvTimeoutError},
     thread,
     time::Duration,
 };
-use yardbird::proof_loop;
+use yardbird::{proof_loop, YardbirdOptions};
 
 #[derive(Debug)]
 enum BenchStatus {
@@ -42,12 +41,18 @@ struct BenchmarkResult {
 }
 
 fn run_benchmark(filename: impl AsRef<Path>) -> BenchmarkResult {
-    let conrete_model = VMTModel::from_path(filename.as_ref()).unwrap();
-    let mut abstract_model = conrete_model.abstract_array_theory();
+    let options = YardbirdOptions {
+        filename: filename.as_ref().to_string_lossy().to_string(),
+        depth: 10,
+        bmc_count: 2,
+        print_vmt: false,
+        run_benchmarks: false,
+        interpolate: false,
+    };
     let (status, used_instantiations) = run_with_timeout(
         move || {
             let mut used_instantiations = vec![];
-            proof_loop(&10_u8, &mut abstract_model, &mut used_instantiations).unwrap();
+            proof_loop(&options, &mut used_instantiations).unwrap();
             used_instantiations
         },
         Duration::from_secs(20),
