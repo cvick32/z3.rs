@@ -28,11 +28,13 @@ mod bmc;
 mod canonicalize_boolean;
 mod frame_num_getter;
 mod instantiator;
+pub mod numbered_to_symbolic;
 pub mod smt;
 mod utils;
 pub mod variable;
 
 pub static VARIABLE_FRAME_DELIMITER: &str = "@";
+pub static NEXT_VARIABLE_NAME: &str = "next";
 
 /// VMTModel represents a transition system given in VMT format.
 /// The VMT specification is no longer available but there is an example here:

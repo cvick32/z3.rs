@@ -79,6 +79,13 @@ pub fn get_commands(content: BufReader<File>, filename: String) -> Vec<crate::co
     commands
 }
 
+pub fn get_term_from_term_string(term: &str) -> Term {
+    // Adding the `assert` here doesn't do anything, it just allows us to
+    // call CommandStream to build a term easily.
+    let command_string = format!("(assert {})", term);
+    get_term_from_assert_command_string(command_string.as_bytes())
+}
+
 pub fn get_term_from_assert_command_string(assert_command: &[u8]) -> Term {
     let stream = CommandStream::new(assert_command, SyntaxBuilder, None);
     let commands = stream.collect::<Result<Vec<_>, _>>().unwrap();

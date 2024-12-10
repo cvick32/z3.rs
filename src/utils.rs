@@ -1,5 +1,8 @@
+use crate::interpolant::Interpolant;
 use smt2parser::{
-    get_term_from_assert_command_string, let_extract::LetExtract, vmt::smt::SMTProblem,
+    get_term_from_term_string,
+    let_extract::LetExtract,
+    vmt::smt::SMTProblem,
 };
 use std::{
     fs::File,
@@ -9,7 +12,7 @@ use std::{
 
 static INTERPOLANT_FILENAME: &str = "interpolant-out.smt2";
 
-pub fn run_smtinterpol(smt_problem: SMTProblem) -> Result<Vec<String>, Error> {
+pub fn run_smtinterpol(smt_problem: SMTProblem) -> Result<Vec<Interpolant>, Error> {
     let interpolant_problem = smt_problem.to_smtinterpol();
     let mut temp_file = File::create(INTERPOLANT_FILENAME)?;
     writeln!(temp_file, "{interpolant_problem}")?;
@@ -30,27 +33,23 @@ pub fn run_smtinterpol(smt_problem: SMTProblem) -> Result<Vec<String>, Error> {
     assert_eq!(stdout[0], "unsat");
     // Second element is the sequent interpolant.
     let mut interpolants = stdout[1].clone();
-    let standin = interpolants.clone();
     // Have to add `and` to the interpolant to make it valid smt2
     interpolants.insert_str(1, "and ");
     // Format it to `assert` call so smt2parser can handle it.
-    let term = get_term_from_assert_command_string(format!("(assert {})", interpolants).as_bytes());
+    let term = get_term_from_term_string(&interpolants);
     let mut let_extract = LetExtract::default();
     let sequent_interpolant = term.clone().accept_term_visitor(&mut let_extract).unwrap();
     // Interpolants will now be the arguments to the `and` term created above.
-    let _interpolants = match sequent_interpolant {
+    let interpolants = match sequent_interpolant {
         smt2parser::concrete::Term::Application {
             qual_identifier: _,
             arguments,
-        } => arguments,
+        } => arguments
+            .iter()
+            .enumerate()
+            .map(|(interpolant_number, term)| Interpolant::from(term, interpolant_number))
+            .collect(),
         _ => panic!("Sequent interpolant is not `and` application."),
     };
-    /* let mut i = 0;
-    println!("-----------------------{}---------------------------", _interpolants.len());
-    for interp in _interpolants {
-        println!("{i}: {interp}");
-        i += 1;
-    } */
-
-    Ok(vec![standin])
+    Ok(interpolants)
 }

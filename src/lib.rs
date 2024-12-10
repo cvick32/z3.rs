@@ -16,6 +16,7 @@ pub mod benchmark;
 pub mod conflict_scheduler;
 mod cost;
 mod egg_utils;
+mod interpolant;
 pub mod logger;
 mod utils;
 
