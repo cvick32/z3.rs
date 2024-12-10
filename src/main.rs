@@ -11,9 +11,8 @@ fn main() -> anyhow::Result<()> {
     if options.run_benchmarks {
         run_benchmarks(&options)
     } else {
-        let mut abstract_vmt_model = model_from_options(&options);
         let mut used_instances = vec![];
-        proof_loop(&options.depth, &mut abstract_vmt_model, &mut used_instances)?;
+        let abstract_vmt_model = proof_loop(&options, &mut used_instances)?;
         info!("NEEDED INSTANTIATIONS: {:#?}", used_instances);
         if options.print_vmt {
             let mut output = File::create("instantiated.vmt").unwrap();

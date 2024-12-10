@@ -39,6 +39,10 @@ pub struct YardbirdOptions {
     #[arg(short, long, default_value_t = false)]
     pub print_vmt: bool,
 
+    /// Run SMTInterpol when BMC depth is UNSAT
+    #[arg(short, long, default_value_t = false)]
+    pub interpolate: bool,
+
     /// Run all of the benchmarks.
     #[arg(short, long, default_value_t = false)]
     pub run_benchmarks: bool,
@@ -46,18 +50,18 @@ pub struct YardbirdOptions {
 
 /// The main verification loop.
 pub fn proof_loop(
-    bmc_depth: &u8,
-    vmt_model: &mut VMTModel,
+    options: &YardbirdOptions,
     used_instances: &mut Vec<String>,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<VMTModel> {
+    let mut abstract_vmt_model = model_from_options(&options);
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
-    for depth in 0..*bmc_depth {
+    for depth in 0..options.depth {
         info!("STARTING BMC FOR DEPTH {}", depth);
         for _ in 0..10 {
             // Run max of 10 iterations for depth
             // Currently run once, this will eventually run until UNSAT
-            let smt = vmt_model.unroll(depth);
+            let smt = abstract_vmt_model.unroll(depth);
             let solver = Solver::new(&context);
             solver.from_string(smt.to_bmc());
             debug!("smt2lib program:\n{}", smt.to_bmc());
@@ -70,11 +74,12 @@ pub fn proof_loop(
             match solver.check() {
                 z3::SatResult::Unsat => {
                     info!("RULED OUT ALL COUNTEREXAMPLES OF DEPTH {}", depth);
-                    // TODO: collect interpolants at depth.
-                    let interpolants = run_smtinterpol(smt);
-                    match interpolants {
-                        Ok(_interps) => (),
-                        Err(err) => println!("Error when computing interpolants: {err}"),
+                    if options.interpolate {
+                        let interpolants = run_smtinterpol(smt);
+                        match interpolants {
+                            Ok(_interps) => (),
+                            Err(err) => println!("Error when computing interpolants: {err}"),
+                        }
                     }
                     break;
                 }
@@ -131,7 +136,7 @@ pub fn proof_loop(
                     // TODO: not sure if this is correct...
                     let no_progress = instantiations
                         .into_iter()
-                        .all(|inst| !vmt_model.add_instantiation(inst, used_instances));
+                        .all(|inst| !abstract_vmt_model.add_instantiation(inst, used_instances));
                     if no_progress {
                         return Err(anyhow!("Failed to add new instantations"));
                     }
@@ -140,7 +145,7 @@ pub fn proof_loop(
         }
     }
     info!("USED INSTANCES: {:#?}", used_instances);
-    Ok(())
+    Ok(abstract_vmt_model)
 }
 
 pub fn model_from_options(options: &YardbirdOptions) -> VMTModel {

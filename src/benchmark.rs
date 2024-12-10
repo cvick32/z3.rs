@@ -55,13 +55,11 @@ pub fn run_benchmarks(options: &YardbirdOptions) -> anyhow::Result<()> {
             filename: path_string.clone(),
             ..options.clone()
         };
-        let mut abstract_vmt_model = model_from_options(&new_options);
         let mut used_instances = vec![];
         let result = run_with_timeout(
             move || {
                 proof_loop(
-                    &new_options.depth,
-                    &mut abstract_vmt_model,
+                    &new_options,
                     &mut used_instances,
                 )
                 .ok()
