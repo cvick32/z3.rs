@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use egg::{Analysis, CostFunction, Language};
-use log::debug;
+use log::{debug, info};
 
 use crate::egg_utils::{DefaultCostFunction, RecExprRoot};
 
@@ -86,8 +86,8 @@ where
                     // e-graph. This is a conflict, so we record the rule instantiation
                     // here.
                     if Some(m.eclass) != rhs_eclass {
-                        debug!("FOUND VIOLATION");
-                        debug!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
+                        info!("FOUND VIOLATION");
+                        info!("{} => {}", new_lhs.pretty(80), new_rhs.pretty(80));
 
                         let instantiation = if rewrite.name.as_str() == "write-does-not-overwrite" {
                             let idx1 = subst.get("?c".parse().unwrap()).unwrap();
