@@ -7,16 +7,22 @@ edition = "2021"
 
 [dependencies]
 anstyle = "1.0.10"
-anyhow = "1.0.93"
-clap = { version = "4.5.20", features = ["derive"] }
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
 egg = "0.9.5"
 env_logger = "0.11.5"
 log = "0.4.22"
 rand = "0.8.5"
-serde = "1.0.215"
-serde_json = "1.0.133"
+serde = { workspace = true }
+serde_json = { workspace = true }
 smt2parser = { path = "./smt2parser", version = "0.6.1" }
 z3 = "0.12.1"
+
+[workspace.dependencies]
+clap = { version = "4.5.20" }
+anyhow = "1.0.93"
+serde = "1.0.215"
+serde_json = "1.0.133"
 
 [dev-dependencies]
 insta = "1.41.1"
@@ -24,4 +30,5 @@ insta = "1.41.1"
 [workspace]
 members = [
     "smt2parser",
+    "garden"
 ]

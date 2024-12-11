@@ -15,7 +15,7 @@ impl Interpolant {
             step: interpolant_number,
         };
         let new_term = term.clone().accept(&mut builder).unwrap();
-        println!("{}: {}", interpolant_number, new_term);
+        log::debug!("{}: {}", interpolant_number, new_term);
         Interpolant {
             _original_term: term.clone(),
             _new_term: new_term,

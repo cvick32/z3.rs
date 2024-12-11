@@ -46,14 +46,12 @@ fn run_benchmark(filename: impl AsRef<Path>) -> BenchmarkResult {
         depth: 10,
         bmc_count: 2,
         print_vmt: false,
-        run_benchmarks: false,
         interpolate: false,
     };
     let (status, used_instantiations) = run_with_timeout(
         move || {
-            let mut used_instantiations = vec![];
-            proof_loop(&options, &mut used_instantiations).unwrap();
-            used_instantiations
+            let res = proof_loop(&options).unwrap();
+            res.used_instances
         },
         Duration::from_secs(20),
     );

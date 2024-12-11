@@ -42,18 +42,20 @@ pub struct YardbirdOptions {
     /// Run SMTInterpol when BMC depth is UNSAT
     #[arg(short, long, default_value_t = false)]
     pub interpolate: bool,
+}
 
-    /// Run all of the benchmarks.
-    #[arg(short, long, default_value_t = false)]
-    pub run_benchmarks: bool,
+#[derive(Debug)]
+pub struct ProofLoopResult {
+    pub model: VMTModel,
+    pub used_instances: Vec<String>,
+    pub const_instances: Vec<String>,
 }
 
 /// The main verification loop.
-pub fn proof_loop(
-    options: &YardbirdOptions,
-    used_instances: &mut Vec<String>,
-) -> anyhow::Result<VMTModel> {
+pub fn proof_loop(options: &YardbirdOptions) -> anyhow::Result<ProofLoopResult> {
     let mut abstract_vmt_model = model_from_options(options);
+    let mut used_instances = vec![];
+    let mut const_instances = vec![];
     let config: Config = Config::new();
     let context: Context = Context::new(&config);
     for depth in 0..options.depth {
@@ -128,14 +130,15 @@ pub fn proof_loop(
                         }
                     }
                     egraph.rebuild();
-                    let instantiations = egraph.saturate();
+                    let (instantiations, const_instantiations) = egraph.saturate();
+                    const_instances.extend_from_slice(&const_instantiations);
 
                     // add all instantiations to the model,
                     // if we have already seen all instantiations, break
                     // TODO: not sure if this is correct...
-                    let no_progress = instantiations
-                        .into_iter()
-                        .all(|inst| !abstract_vmt_model.add_instantiation(inst, used_instances));
+                    let no_progress = instantiations.into_iter().all(|inst| {
+                        !abstract_vmt_model.add_instantiation(inst, &mut used_instances)
+                    });
                     if no_progress {
                         return Err(anyhow!("Failed to add new instantations"));
                     }
@@ -143,7 +146,11 @@ pub fn proof_loop(
             }
         }
     }
-    Ok(abstract_vmt_model)
+    Ok(ProofLoopResult {
+        model: abstract_vmt_model,
+        used_instances,
+        const_instances,
+    })
 }
 
 pub fn model_from_options(options: &YardbirdOptions) -> VMTModel {
