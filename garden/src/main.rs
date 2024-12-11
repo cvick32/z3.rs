@@ -158,14 +158,18 @@ fn main() -> anyhow::Result<()> {
                 depth: options.depth,
                 bmc_count: 10,
                 print_vmt: false,
-                interpolate: true,
+                interpolate: false,
             };
             run_single(yardbird_options)
         })
         .collect::<Result<_, _>>()?;
 
     if let Some(output) = options.output {
-        let file = OpenOptions::new().truncate(true).open(output)?;
+        let file = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(output)?;
         if options.pretty {
             serde_json::to_writer_pretty(file, &results)?;
         } else {
