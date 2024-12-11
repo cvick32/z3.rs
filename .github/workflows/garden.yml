@@ -25,7 +25,7 @@ jobs:
     - name: Run benchmarks
       run: ./target/release/garden examples -o garden.json
     - name: Upload
-      uses: actions/update-artifact@v4
+      uses: actions/upload-artifact@v4
       with:
         name: results-${{ github.head_ref }}-${{ github.sha }}
         path: garden.json
