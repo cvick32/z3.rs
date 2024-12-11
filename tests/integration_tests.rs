@@ -11,15 +11,13 @@ macro_rules! create_integration_test {
                 depth: 10,
                 bmc_count: 2,
                 print_vmt: false,
-                run_benchmarks: false,
                 interpolate: false,
             };
-            let mut used: Vec<String> = vec![];
-            proof_loop(&options, &mut used).unwrap();
+            let res = proof_loop(&options).unwrap();
             assert!(
-                used.len() == $num_instances,
+                res.used_instances.len() == $num_instances,
                 "{} != {}",
-                used.len(),
+                res.used_instances.len(),
                 $num_instances
             );
         }

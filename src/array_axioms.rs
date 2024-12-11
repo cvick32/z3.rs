@@ -34,17 +34,22 @@ impl<N> Saturate for EGraph<ArrayLanguage, N>
 where
     N: Analysis<ArrayLanguage> + Default + 'static,
 {
-    fn saturate(&mut self) -> Vec<String> {
+    type Ret = (Vec<String>, Vec<String>);
+    fn saturate(&mut self) -> (Vec<String>, Vec<String>) {
         let egraph = std::mem::take(self);
         let scheduler = ConflictScheduler::new(BackoffScheduler::default());
         let instantiations = scheduler.instantiations();
+        let const_instantiations = scheduler.instantiations_w_constants();
         let mut runner = Runner::default()
             .with_egraph(egraph)
             .with_scheduler(scheduler)
             .run(&array_axioms());
         *self = std::mem::take(&mut runner.egraph);
         drop(runner);
-        Rc::into_inner(instantiations).unwrap().into_inner()
+        (
+            Rc::into_inner(instantiations).unwrap().into_inner(),
+            Rc::into_inner(const_instantiations).unwrap().into_inner(),
+        )
     }
 }
 
