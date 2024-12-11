@@ -68,6 +68,22 @@ fn get_interpolant_name(i: usize) -> String {
     }
 }
 
+pub fn get_function_name(qual_identifier: crate::concrete::QualIdentifier) -> String {
+    match qual_identifier {
+        crate::concrete::QualIdentifier::Simple { identifier } => match identifier {
+            crate::concrete::Identifier::Simple { symbol } => symbol.0,
+            crate::concrete::Identifier::Indexed { symbol, indices: _ } => symbol.0,
+        },
+        crate::concrete::QualIdentifier::Sorted {
+            identifier,
+            sort: _,
+        } => match identifier {
+            crate::concrete::Identifier::Simple { symbol } => symbol.0,
+            crate::concrete::Identifier::Indexed { symbol, indices: _ } => symbol.0,
+        },
+    }
+}
+
 /// Only call this method if you're sure that the given Term is or should be
 /// an `and` Application. It will panic if not.
 pub fn get_and_terms(term: Box<Term>) -> Vec<Term> {

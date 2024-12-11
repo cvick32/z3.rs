@@ -7,7 +7,7 @@ use crate::{
     },
 };
 
-use super::{action::Action, bmc::BMCBuilder, variable::Variable};
+use super::{action::Action, bmc::BMCBuilder, term_extractor::TermExtractor, variable::Variable};
 
 static SMT_INTERPOL_OPTIONS: &str = "(set-option :print-success false)\n(set-option :produce-interpolants true)\n(set-logic QF_UFLIA)";
 
@@ -102,6 +102,33 @@ impl SMTProblem {
             assert_terms.push(extracted.to_string());
         }
         assert_terms
+    }
+
+    pub fn get_eq_terms(&self) {
+        let mut let_extract = LetExtract::default();
+        let mut assert_terms = self
+            .init_and_trans_assertions
+            .iter()
+            .map(|term| term.clone().accept_term_visitor(&mut let_extract).unwrap())
+            .collect::<Vec<_>>();
+        if self.property_assertion.is_some() {
+            let extracted = self
+                .property_assertion
+                .clone()
+                .unwrap()
+                .accept_term_visitor(&mut let_extract)
+                .unwrap();
+            assert_terms.push(extracted);
+        }
+        let mut term_extractor = TermExtractor::default();
+        let _ = assert_terms
+            .iter()
+            .map(|x| x.clone().accept(&mut term_extractor))
+            .collect::<Vec<_>>();
+        term_extractor
+            .terms
+            .iter()
+            .for_each(|tt| println!("{}", tt));
     }
 
     pub fn to_bmc(&self) -> String {

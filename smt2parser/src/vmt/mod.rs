@@ -30,6 +30,7 @@ mod frame_num_getter;
 mod instantiator;
 pub mod numbered_to_symbolic;
 pub mod smt;
+pub mod term_extractor;
 mod utils;
 pub mod variable;
 

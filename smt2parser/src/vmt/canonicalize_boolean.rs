@@ -4,6 +4,8 @@ use crate::{
     Error,
 };
 
+use super::utils::get_function_name;
+
 #[derive(Clone, Debug, Default)]
 /// SMTInterpol doesn't accept `and` terms with non-2 arity. For instance, neither (and b@0) nor
 /// (and b@1 b@1 b@1) will compile. This visitor rewrites `and` and `or` terms to use only arity-2.
@@ -130,22 +132,6 @@ impl TermVisitor<Constant, QualIdentifier, Keyword, SExpr, Symbol, Sort>
             term: Box::new(term.accept_term_visitor(self).unwrap()),
             attributes,
         })
-    }
-}
-
-fn get_function_name(qual_identifier: crate::concrete::QualIdentifier) -> String {
-    match qual_identifier {
-        crate::concrete::QualIdentifier::Simple { identifier } => match identifier {
-            crate::concrete::Identifier::Simple { symbol } => symbol.0,
-            crate::concrete::Identifier::Indexed { symbol, indices: _ } => symbol.0,
-        },
-        crate::concrete::QualIdentifier::Sorted {
-            identifier,
-            sort: _,
-        } => match identifier {
-            crate::concrete::Identifier::Simple { symbol } => symbol.0,
-            crate::concrete::Identifier::Indexed { symbol, indices: _ } => symbol.0,
-        },
     }
 }
 
