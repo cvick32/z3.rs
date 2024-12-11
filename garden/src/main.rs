@@ -85,7 +85,7 @@ where
     let (tx, rx) = mpsc::channel::<TimeoutFnResult<Result<T, E>>>();
     let _ = thread::spawn(move || {
         // remove the default panic hook that prints the message
-        // panic::set_hook(Box::new(|_| {}));
+        panic::set_hook(Box::new(|_| {}));
 
         // catch the panic so that we can extract the message
         let result = panic::catch_unwind(f);
