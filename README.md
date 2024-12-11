@@ -82,7 +82,8 @@ tt: Z3Object = (+ 1 (Read-Int-Int a@0 i@0))
 
 egraph.join(model.eval(tt), tt)
 
-
+# Strange Behavior with Z3VarContext
+Moving Z3VarContext to before a call to `smt.to_bmc()` changes affects whether or not we terminate on `array_copy.vmt`. I have no idea why this happens. Maybe Z3VarContext changes the variable Commands in `smt`, but I printed out the bmc queries in both cases and they're exactly the same. Maybe it causes something strange to happen in the Z3 Context. Either way it might be worth digger a little more into. 
 
 # TODOs
 - [ ] remove let statements when VMTModel is built so that we don't have to call LetExtract so much
