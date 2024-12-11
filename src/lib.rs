@@ -9,6 +9,7 @@ use log::{debug, info};
 use smt2parser::vmt::VMTModel;
 use utils::run_smtinterpol;
 use z3::{Config, Context, Solver};
+use z3_var_context::Z3VarContext;
 
 pub mod analysis;
 pub mod array_axioms;
@@ -19,6 +20,7 @@ mod egg_utils;
 mod interpolant;
 pub mod logger;
 mod utils;
+mod z3_var_context;
 
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
@@ -65,6 +67,7 @@ pub fn proof_loop(
             let solver = Solver::new(&context);
             solver.from_string(smt.to_bmc());
             debug!("smt2lib program:\n{}", smt.to_bmc());
+            let z3_var_context = Z3VarContext::from(&context, &smt);
             // TODO: abstract this out somehow
             let mut egraph: egg::EGraph<ArrayLanguage, _> =
                 egg::EGraph::new(SaturationInequalities).with_explanations_enabled();
@@ -92,44 +95,15 @@ pub fn proof_loop(
                     // find Array theory fact that rules out counterexample
                     let model = solver.get_model().ok_or(anyhow!("No z3 model"))?;
                     debug!("model:\n{}", model);
-
-                    for func_decl in model.iter() {
-                        if func_decl.arity() == 0 {
-                            // VARIABLE
-                            // Apply no arguments to the constant so we can call get_const_interp.
-                            let func_decl_ast = func_decl.apply(&[]);
-                            let var_id = egraph.add_expr(&func_decl.name().parse()?);
-                            let value = model
-                                .get_const_interp(&func_decl_ast)
-                                .expect("Model failure.");
-                            let value_id = egraph.add_expr(&value.to_string().parse()?);
-                            egraph.union(var_id, value_id);
-                        } else {
-                            // FUNCTION DEF
-                            let interpretation = model
-                                .get_func_interp(&func_decl)
-                                .ok_or(anyhow!("No func interp"))?;
-                            for entry in interpretation.get_entries() {
-                                let function_call = format!(
-                                    "({} {})",
-                                    func_decl.name(),
-                                    entry
-                                        .get_args()
-                                        .iter()
-                                        .map(ToString::to_string)
-                                        .collect::<Vec<_>>()
-                                        .join(" ")
-                                );
-                                let function_id = egraph.add_expr(&function_call.parse()?);
-                                let value_id =
-                                    egraph.add_expr(&entry.get_value().to_string().parse()?);
-                                egraph.union(function_id, value_id);
-                            }
-                        }
-                    }
+                    update_egraph_from_model(&mut egraph, &model)?;
+                    update_egraph_with_non_array_function_terms(
+                        &mut egraph,
+                        smt,
+                        &z3_var_context,
+                        &model,
+                    )?;
                     egraph.rebuild();
                     let instantiations = egraph.saturate();
-
                     // add all instantiations to the model,
                     // if we have already seen all instantiations, break
                     // TODO: not sure if this is correct...
@@ -144,6 +118,73 @@ pub fn proof_loop(
         }
     }
     Ok(abstract_vmt_model)
+}
+
+/// This function adds terms into the Egraph from the SMTProblem
+/// that are not explicitly listed in the model. For instance,
+/// in `array_copy_increment.vmt`, the term (+ 1 (Read a i))
+/// will never be added to the egraph because it's neither a
+/// constant nor a direct application of an Array function. We
+/// still want these terms in the Egraph so that we can substitute
+/// them in for constants.
+fn update_egraph_with_non_array_function_terms<'ctx>(
+    egraph: &mut egg::EGraph<ArrayLanguage, SaturationInequalities>,
+    smt: smt2parser::vmt::smt::SMTProblem,
+    z3_var_context: &'ctx Z3VarContext<'ctx>,
+    model: &z3::Model<'ctx>,
+) -> anyhow::Result<()> {
+    for term in smt.get_eq_terms() {
+        let term_id = egraph.add_expr(&term.to_string().parse()?);
+        let z3_term = z3_var_context.rewrite_term(&term);
+        let model_interp = model
+            .eval(&z3_term, false)
+            .unwrap_or_else(|| panic!("Term not found in model: {term}"));
+        let interp_id = egraph.add_expr(&model_interp.to_string().parse()?);
+        println!("Adding: {} = {}", term, model_interp);
+        egraph.union(term_id, interp_id);
+    }
+    Ok(())
+}
+
+/// Add variable and Array function interpretations into the egraph.
+fn update_egraph_from_model(
+    egraph: &mut egg::EGraph<ArrayLanguage, SaturationInequalities>,
+    model: &z3::Model<'_>,
+) -> anyhow::Result<()> {
+    for func_decl in model.iter() {
+        if func_decl.arity() == 0 {
+            // VARIABLE
+            // Apply no arguments to the constant so we can call get_const_interp.
+            let func_decl_ast = func_decl.apply(&[]);
+            let var_id = egraph.add_expr(&func_decl.name().parse()?);
+            let value = model.get_const_interp(&func_decl_ast).ok_or(anyhow!(
+                "Could not find interpretation for variable: {func_decl}"
+            ))?;
+            let value_id = egraph.add_expr(&value.to_string().parse()?);
+            egraph.union(var_id, value_id);
+        } else {
+            // FUNCTION DEF
+            let interpretation = model
+                .get_func_interp(&func_decl)
+                .ok_or(anyhow!("No function interpretation for: {func_decl}"))?;
+            for entry in interpretation.get_entries() {
+                let function_call = format!(
+                    "({} {})",
+                    func_decl.name(),
+                    entry
+                        .get_args()
+                        .iter()
+                        .map(ToString::to_string)
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                );
+                let function_id = egraph.add_expr(&function_call.parse()?);
+                let value_id = egraph.add_expr(&entry.get_value().to_string().parse()?);
+                egraph.union(function_id, value_id);
+            }
+        }
+    }
+    Ok(())
 }
 
 pub fn model_from_options(options: &YardbirdOptions) -> VMTModel {
