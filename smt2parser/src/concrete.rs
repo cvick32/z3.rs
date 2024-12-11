@@ -65,6 +65,24 @@ pub enum QualIdentifier<Identifier = self::Identifier, Sort = self::Sort> {
     Sorted { identifier: Identifier, sort: Sort },
 }
 
+impl QualIdentifier {
+    pub fn get_name(&self) -> String {
+        match self {
+            crate::concrete::QualIdentifier::Simple { identifier } => match identifier {
+                crate::concrete::Identifier::Simple { symbol } => symbol.0.clone(),
+                crate::concrete::Identifier::Indexed { symbol, indices: _ } => symbol.0.clone(),
+            },
+            crate::concrete::QualIdentifier::Sorted {
+                identifier,
+                sort: _,
+            } => match identifier {
+                crate::concrete::Identifier::Simple { symbol } => symbol.0.clone(),
+                crate::concrete::Identifier::Indexed { symbol, indices: _ } => symbol.0.clone(),
+            },
+        }
+    }
+}
+
 /// Concrete syntax for a term.
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
 pub enum Term<

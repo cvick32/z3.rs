@@ -2,8 +2,6 @@ use std::collections::HashMap;
 
 use crate::concrete::{SyntaxBuilder, Term};
 
-use super::utils::get_function_name;
-
 /// CV: Currently I'm thinking that we don't care at all about boolean functions for
 /// this use case. Adding a bunch of True/False values into the egraph will probably
 /// just bog stuff down. We don't care about Reads and Writes because we're already
@@ -42,7 +40,7 @@ impl crate::rewriter::Rewriter for TermExtractor {
         qual_identifier: <Self::V as crate::visitors::Smt2Visitor>::QualIdentifier,
         arguments: Vec<<Self::V as crate::visitors::Smt2Visitor>::Term>,
     ) -> Result<<Self::V as crate::visitors::Smt2Visitor>::Term, Self::Error> {
-        let function_name = get_function_name(qual_identifier.clone());
+        let function_name = qual_identifier.get_name();
         let term = Term::Application {
             qual_identifier: qual_identifier.clone(),
             arguments: arguments.clone(),

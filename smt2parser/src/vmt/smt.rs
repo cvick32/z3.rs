@@ -35,6 +35,14 @@ impl SMTProblem {
         self.init_and_trans_assertions.len()
     }
 
+    pub fn get_variable_definitions(&self) -> Vec<Command> {
+        self.variable_definitions.clone()
+    }
+
+    pub fn get_function_definitions(&self) -> Vec<Command> {
+        self.function_definitions.clone()
+    }
+
     pub fn add_assertion(&mut self, condition: &Term, mut builder: BMCBuilder) {
         let rewritten_condition = match condition {
             Term::Attributes {
@@ -104,7 +112,7 @@ impl SMTProblem {
         assert_terms
     }
 
-    pub fn get_eq_terms(&self) {
+    pub fn get_eq_terms(&self) -> Vec<Term> {
         let mut let_extract = LetExtract::default();
         let mut assert_terms = self
             .init_and_trans_assertions
@@ -125,10 +133,7 @@ impl SMTProblem {
             .iter()
             .map(|x| x.clone().accept(&mut term_extractor))
             .collect::<Vec<_>>();
-        term_extractor
-            .terms
-            .iter()
-            .for_each(|tt| println!("{}", tt));
+        term_extractor.terms
     }
 
     pub fn to_bmc(&self) -> String {
