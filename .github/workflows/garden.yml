@@ -24,3 +24,8 @@ jobs:
       run: cargo build --release -p garden
     - name: Run benchmarks
       run: ./target/release/garden examples -o garden.json
+    - name: Upload
+      uses: actions/update-artifact@v4
+      with:
+        name: results-${{ github.head_ref }}-${{ github.sha }}
+        path: garden.json
